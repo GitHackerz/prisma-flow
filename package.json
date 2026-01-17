@@ -1,0 +1,7 @@
+{
+  "name": "prisma-flow-root",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
