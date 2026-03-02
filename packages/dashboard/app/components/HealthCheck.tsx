@@ -1,46 +1,41 @@
 'use client'
 
-import { Badge } from "./ui/badge"
+import { Badge } from './ui/badge'
+import type { ProjectStatus } from '../../lib/api'
 
-interface Status {
-    connected: boolean
-    migrationsFailed: number
-    driftDetected: boolean
-}
+export function HealthCheck({ status }: { status: ProjectStatus | null }) {
+  if (!status) return <Badge variant="outline">Connecting…</Badge>
 
-export function HealthCheck({ status }: { status: Status | null }) {
-    if (!status) return <Badge variant="outline">Loading...</Badge>
+  let health: 'healthy' | 'warning' | 'error' = 'healthy'
+  let message = 'System Operational'
 
-    let health: 'healthy' | 'warning' | 'error' = 'healthy'
-    let message = 'System Operational'
+  if (status.migrationsFailed > 0) {
+    health  = 'error'
+    message = 'Migration Failures'
+  } else if (status.driftDetected) {
+    health  = 'warning'
+    message = `Schema Drift (${status.driftCount})`
+  } else if (!status.connected) {
+    health  = 'error'
+    message = 'DB Disconnected'
+  }
 
-    if (status.migrationsFailed > 0) {
-        health = 'error'
-        message = 'Migration Failures'
-    } else if (status.driftDetected) {
-        health = 'warning'
-        message = 'Schema Drift'
-    } else if (!status.connected) {
-        health = 'error'
-        message = 'DB Disconnected'
-    }
+  const variants: Record<typeof health, string> = {
+    healthy: 'bg-green-100 text-green-800 hover:bg-green-100 border-green-200 dark:bg-green-900/30 dark:text-green-400',
+    warning: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400',
+    error:   'bg-destructive/10 text-destructive hover:bg-destructive/10 border-destructive/20',
+  }
 
-    const variants = {
-        healthy: "bg-green-100 text-green-800 hover:bg-green-100 border-green-200",
-        warning: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-yellow-200",
-        error: "bg-red-100 text-red-800 hover:bg-red-100 border-red-200"
-    }
-    
-    const icons = {
-        healthy: "✅",
-        warning: "⚠️",
-        error: "❌"
-    }
+  const icons: Record<typeof health, string> = {
+    healthy: '✅',
+    warning: '⚠️',
+    error:   '❌',
+  }
 
-    return (
-        <Badge className={`px-3 py-1 text-sm font-medium border ${variants[health]}`}>
-            <span className="mr-2">{icons[health]}</span>
-            {message}
-        </Badge>
-    )
+  return (
+    <Badge className={`px-3 py-1 text-sm font-medium border ${variants[health]}`}>
+      <span className="mr-2">{icons[health]}</span>
+      {message}
+    </Badge>
+  )
 }

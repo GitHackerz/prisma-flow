@@ -1,154 +1,205 @@
-import { exec } from 'child_process'
-import util from 'util'
-import { PrismaProject, detectPrismaProject, ProjectStatus } from './prisma-detector'
-import { detectDrift } from './drift-detector'
+import { execFile } from 'child_process'
+import { promisify } from 'util'
+import { detectPrismaProject, type Migration, type ProjectStatus } from './prisma-detector.js'
+import { detectDrift } from './drift-detector.js'
+import { logger } from '../logger.js'
 import fs from 'fs/promises'
-import path from 'path'
 
-const execAsync = util.promisify(exec)
+const execFileAsync = promisify(execFile)
+
+// ─── Risk keywords ────────────────────────────────────────────────────────────
+
+const RISK_PATTERNS: Array<{ pattern: string; label: string }> = [
+  { pattern: 'DROP TABLE',    label: 'Drops table — irreversible data loss' },
+  { pattern: 'DROP COLUMN',   label: 'Drops column — potential data loss' },
+  { pattern: 'DELETE FROM',   label: 'Bulk data deletion' },
+  { pattern: 'TRUNCATE',      label: 'Truncates table — full data loss' },
+  { pattern: 'ALTER TABLE',   label: 'Alters table structure' },
+  { pattern: 'DROP INDEX',    label: 'Removes index — may impact performance' },
+  { pattern: 'DROP CONSTRAINT', label: 'Removes constraint — may allow invalid data' },
+]
+
+export function analyzeMigrationRisks(sql: string): string[] {
+  const upper = sql.toUpperCase()
+  return RISK_PATTERNS
+    .filter(({ pattern }) => upper.includes(pattern))
+    .map(({ label }) => label)
+}
+
+// ─── Migration status parsing ─────────────────────────────────────────────────
+
+/**
+ * Run `prisma migrate status` safely using execFile (no shell) and parse the
+ * output to build a map of migration name → status.
+ *
+ * Handles three states:
+ *   applied  – every migration is applied (exit 0, empty stdout section)
+ *   pending  – listed under "have not yet been applied"
+ *   failed   – listed under "failed to apply" or "rolled back"
+ */
+async function getMigrationStatusMap(
+  cwd: string,
+  schemaPath: string,
+): Promise<Map<string, Migration['status']>> {
+  const map = new Map<string, Migration['status']>()
+
+  let stdout = ''
+  try {
+    const result = await execFileAsync(
+      'npx',
+      ['prisma', 'migrate', 'status', '--schema', schemaPath],
+      { cwd, timeout: 30_000 },
+    )
+    stdout = result.stdout
+    // Exit 0 → all migrations applied; map stays empty (callers default to 'applied')
+    return map
+  } catch (err: unknown) {
+    const error = err as { stdout?: string; stderr?: string; message?: string }
+    stdout = error.stdout ?? ''
+    const stderr = error.stderr ?? ''
+
+    // Connection failure — nothing we can parse
+    if (
+      stderr.includes('P1001') ||
+      stderr.includes("Can't reach database server") ||
+      stderr.includes('Connection refused')
+    ) {
+      throw new Error('DATABASE_UNREACHABLE')
+    }
+
+    logger.debug({ stdout, stderr }, 'prisma migrate status exited non-zero — parsing output')
+  }
+
+  const lines = stdout.split('\n')
+  let mode: 'none' | 'pending' | 'failed' = 'none'
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim()
+
+    // Section headers
+    if (line.includes('have not yet been applied')) { mode = 'pending'; continue }
+    if (line.match(/failed to apply|rolled back|migration.*failed/i)) { mode = 'failed'; continue }
+    // End of a section
+    if (line === '' || line.startsWith('─') || line.startsWith('The following')) { mode = 'none'; continue }
+
+    if (mode === 'none') continue
+
+    // Migration entries look like: "20231201120000_add_users"
+    // They may be indented or prefixed with "• " or "- "
+    const cleaned = line.replace(/^[•\-*]\s*/, '').trim()
+    if (cleaned.match(/^\d{14}/)) {
+      map.set(cleaned, mode === 'pending' ? 'pending' : 'failed')
+    }
+  }
+
+  return map
+}
+
+// ─── Public API ───────────────────────────────────────────────────────────────
 
 export async function getMigrationDetails(cwd: string, name: string) {
-    const project = await detectPrismaProject(cwd)
-    if (!project) return null
-    
-    const migration = project.migrations.find(m => m.name === name)
-    if (!migration) return null
-    
-    // Read SQL content
-    let sql = ''
-    try {
-        sql = await fs.readFile(migration.sqlPath, 'utf-8')
-    } catch {
-        sql = '-- Could not read migration file'
-    }
-    
-    // Analyze risks
-    const risks = []
-    const upSql = sql.toUpperCase()
-    if (upSql.includes('DROP TABLE')) risks.push('Drops Table')
-    if (upSql.includes('DROP COLUMN')) risks.push('Drops Column')
-    if (upSql.includes('ALTER TABLE')) risks.push('Alters Table')
-    if (upSql.includes('DELETE FROM')) risks.push('Deletes Data')
+  const project = await detectPrismaProject(cwd)
+  if (!project) return null
 
-    return {
-        ...migration,
-        sql,
-        risks
-    }
+  const migration = project.migrations.find((m) => m.name === name)
+  if (!migration) return null
+
+  let sql = ''
+  try {
+    sql = await fs.readFile(migration.sqlPath, 'utf-8')
+  } catch {
+    sql = '-- Could not read migration file'
+  }
+
+  const risks = analyzeMigrationRisks(sql)
+
+  return { ...migration, sql, risks }
 }
 
-async function getMigrationStatusMap(cwd: string, schemaPath: string): Promise<Map<string, 'applied' | 'pending' | 'failed'>> {
-    const map = new Map<string, 'applied' | 'pending' | 'failed'>()
-    
-    try {
-        // If this succeeds, all migrations are applied
-        await execAsync(`npx prisma migrate status --schema="${schemaPath}"`, { cwd })
-        return map // all default to applied in the caller logic if we change the default
-    } catch (e: any) {
-        const stdout = e.stdout || ''
-        
-        // Parse pending migrations
-        if (stdout.includes('have not yet been applied')) {
-            const lines = stdout.split('\n')
-            let capturing = false
-            for (const line of lines) {
-                if (line.includes('have not yet been applied')) {
-                    capturing = true
-                    continue
-                }
-                if (capturing) {
-                    const trimmed = line.trim()
-                    if (!trimmed) continue
-                    if (trimmed.includes('More information')) break
-                    
-                    // The line is usually the migration name
-                    map.set(trimmed, 'pending')
-                }
-            }
-        }
-        
-        // Parse failed migrations (if any - prisma usually stops at the first failed one)
-        // "Migration X failed"
-        // TODO: Handle failed state parsing if needed
-    }
-    return map
-}
+export async function getMigrations(cwd: string): Promise<(Migration & { risks: string[] })[]> {
+  const project = await detectPrismaProject(cwd)
+  if (!project) return []
 
-export async function getMigrations(cwd: string) {
-    const project = await detectPrismaProject(cwd)
-    if (!project) return []
-    
-    const statusMap = await getMigrationStatusMap(cwd, project.schemaPath)
-    
-    return project.migrations.map(m => {
-        const status = statusMap.get(m.name) || 'applied'
-        return {
-            ...m,
-            status: status
-        }
-    })
+  let statusMap: Map<string, Migration['status']>
+  try {
+    statusMap = await getMigrationStatusMap(cwd, project.schemaPath)
+  } catch {
+    statusMap = new Map()
+  }
+
+  return Promise.all(
+    project.migrations.map(async (m) => {
+      const status = statusMap.get(m.name) ?? 'applied'
+      let sql = ''
+      try { sql = await fs.readFile(m.sqlPath, 'utf-8') } catch { /* ignore */ }
+      const risks = analyzeMigrationRisks(sql)
+      return { ...m, status, risks }
+    }),
+  )
 }
 
 export async function getProjectStatus(cwd: string): Promise<ProjectStatus> {
-    const project = await detectPrismaProject(cwd)
-    if (!project) {
-        throw new Error('No Prisma project found')
-    }
+  const project = await detectPrismaProject(cwd)
+  if (!project) throw new Error('No Prisma project found')
 
-    let connected = false
-    let hasDrift = false
-    
-    // Check connection first
+  // ── Connection check ──────────────────────────────────────────────────────
+  let connected = false
+  try {
+    await execFileAsync(
+      'npx',
+      ['prisma', 'migrate', 'status', '--schema', project.schemaPath],
+      { cwd, timeout: 30_000 },
+    )
+    connected = true
+  } catch (err: unknown) {
+    const error = err as { stderr?: string; stdout?: string; message?: string }
+    const stderr = error.stderr ?? ''
+    if (
+      stderr.includes('P1001') ||
+      stderr.includes("Can't reach database server") ||
+      stderr.includes('Connection refused')
+    ) {
+      connected = false
+    } else {
+      // Non-zero exit due to pending/failed migrations — still connected
+      connected = true
+    }
+  }
+
+  const migrations = await getMigrations(cwd)
+  const pendingCount = migrations.filter((m) => m.status === 'pending').length
+  const failedCount  = migrations.filter((m) => m.status === 'failed').length
+  const appliedCount = migrations.filter((m) => m.status === 'applied').length
+
+  // ── Drift detection ───────────────────────────────────────────────────────
+  // Always report real drift independently of pending migrations.
+  // Pending migrations are "schema ahead of DB"; genuine drift is "DB diverged
+  // from the migration history" — both can coexist and both matter.
+  let driftItems: Awaited<ReturnType<typeof detectDrift>> = []
+  let hasDrift = false
+  if (connected) {
     try {
-        // Simple connection check using version or just list
-        // Using migrate status --exit-code could be better but 'migrate status' is fine
-        await execAsync(`npx prisma migrate status --schema="${project.schemaPath}"`, { cwd })
-        connected = true
-    } catch (e: any) {
-        if (e.message.includes('Can\'t reach database server') || (e.stdout && e.stdout.includes('P1001'))) {
-            connected = false
-        } else {
-            // If it failed but NOT because of connection (e.g. pending migrations), we are still connected
-            connected = true
-        }
+      driftItems = await detectDrift(cwd)
+      hasDrift   = driftItems.length > 0
+    } catch {
+      // drift check errors are non-fatal
     }
+  }
 
-    const migrations = await getMigrations(cwd)
-    
-    const pendingCount = migrations.filter(m => m.status === 'pending').length
-    const failedCount = migrations.filter(m => m.status === 'failed').length
-    const appliedCount = migrations.filter(m => m.status === 'applied').length
+  // ── Risk level ────────────────────────────────────────────────────────────
+  let riskLevel: ProjectStatus['riskLevel'] = 'low'
+  if (failedCount > 0)  riskLevel = 'high'
+  else if (hasDrift)    riskLevel = 'medium'
+  else if (pendingCount > 0) riskLevel = 'low'  // pending is expected, not risky by default
 
-    // Detect drift if connected
-    if (connected) {
-        try {
-            const drift = await detectDrift(cwd)
-            // If we have pending migrations, migrate diff might just be showing those.
-            // But we consider it drift if there are changes.
-            // A clearer definition of drift is "Changes in DB that are NOT in Schema" OR "Changes in Schema NOT in DB" (which is pending).
-            // For now, if drift array > 0, we flag it.
-            // But if there IS real drift (extra table) AND pending migration, we want to know.
-            // It's hard to distinguish without parsing the SQL.
-            
-            // For MVP:
-            hasDrift = drift.length > 0 && pendingCount === 0;
-            
-        } catch (e) {
-            // ignore drift check error
-        }
-    }
-
-    let riskLevel: 'low' | 'medium' | 'high' = 'low'
-    if (failedCount > 0) riskLevel = 'high'
-    if (hasDrift) riskLevel = 'medium'
-
-    return {
-        connected,
-        appliedCount: connected ? appliedCount : 0,
-        pendingCount: connected ? pendingCount : migrations.length,
-        failedCount,
-        hasDrift,
-        riskLevel,
-        lastSync: new Date()
-    }
+  return {
+    connected,
+    appliedCount: connected ? appliedCount : 0,
+    pendingCount: connected ? pendingCount : migrations.length,
+    failedCount,
+    hasDrift,
+    driftCount: driftItems.length,
+    riskLevel,
+    lastSync: new Date(),
+  }
 }

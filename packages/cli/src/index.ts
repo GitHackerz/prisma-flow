@@ -1,18 +1,22 @@
 #!/usr/bin/env node
 import { Command } from 'commander'
-import { dashboardCommand } from './commands/dashboard'
-import { statusCommand } from './commands/status'
-import { checkCommand } from './commands/check'
+import { dashboardCommand } from './commands/dashboard.js'
+import { statusCommand }    from './commands/status.js'
+import { checkCommand }     from './commands/check.js'
+import { initCommand }      from './commands/init.js'
+import { doctorCommand }    from './commands/doctor.js'
 
 const program = new Command()
 
 program
   .name('prisma-flow')
-  .description('Prisma Migration Management CLI')
-  .version('0.1.0')
+  .description('Visual Prisma migration management — safe, observable, production-ready')
+  .version(process.env['npm_package_version'] ?? '0.1.0')
 
 program.addCommand(dashboardCommand(), { isDefault: true })
 program.addCommand(statusCommand())
 program.addCommand(checkCommand())
+program.addCommand(initCommand())
+program.addCommand(doctorCommand())
 
 program.parse(process.argv)
