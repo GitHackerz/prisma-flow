@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
 interface SectionProps {
   id?: string
@@ -8,10 +8,8 @@ interface SectionProps {
 
 export function Section({ id, children, className }: SectionProps) {
   return (
-    <section id={id} className={cn("py-24 sm:py-32", className)}>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {children}
-      </div>
+    <section id={id} className={cn('py-24 sm:py-32', className)}>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{children}</div>
     </section>
   )
 }
@@ -25,7 +23,7 @@ interface SectionHeaderProps {
 
 export function SectionHeader({ badge, title, description, className }: SectionHeaderProps) {
   return (
-    <div className={cn("text-center", className)}>
+    <div className={cn('text-center', className)}>
       {badge && (
         <div className="mb-4 inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 text-xs font-medium text-primary">
           {badge}

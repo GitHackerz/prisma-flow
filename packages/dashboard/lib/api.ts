@@ -6,13 +6,13 @@
  * Falls back to no token in dev/SSR environments where window is unavailable.
  */
 import type {
-  ProjectStatus,
+  ApiSuccess,
+  DriftItem,
+  DriftResult,
   Migration,
   MigrationDetail,
-  DriftResult,
-  DriftItem,
   PaginatedResponse,
-  ApiSuccess,
+  ProjectStatus,
 } from '@prisma-flow/shared'
 
 // Re-export types so components can import from this single module
@@ -28,7 +28,7 @@ function getToken(): string {
 // ─── Base fetcher ─────────────────────────────────────────────────────────────
 
 const BASE_URL =
-  process.env['NEXT_PUBLIC_API_URL'] ??
+  process.env.NEXT_PUBLIC_API_URL ??
   (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5555')
 
 export class ApiRequestError extends Error {
@@ -43,19 +43,19 @@ export class ApiRequestError extends Error {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getToken()
-  const url   = `${BASE_URL}${path}${path.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`
+  const url = `${BASE_URL}${path}${path.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`
 
   const res = await fetch(url, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      Authorization:  token ? `Bearer ${token}` : '',
+      Authorization: token ? `Bearer ${token}` : '',
       ...init?.headers,
     },
   })
 
   if (!res.ok) {
-    const body = await res.json().catch(() => ({})) as { error?: string }
+    const body = (await res.json().catch(() => ({}))) as { error?: string }
     throw new ApiRequestError(res.status, body.error ?? `HTTP ${res.status}`)
   }
 
@@ -74,7 +74,9 @@ export async function fetchMigrations(page = 1, limit = 50): Promise<PaginatedRe
 }
 
 export async function fetchMigrationDetail(name: string): Promise<MigrationDetail> {
-  const body = await request<ApiSuccess<MigrationDetail>>(`/api/migrations/${encodeURIComponent(name)}`)
+  const body = await request<ApiSuccess<MigrationDetail>>(
+    `/api/migrations/${encodeURIComponent(name)}`,
+  )
   return body.data
 }
 
@@ -91,7 +93,7 @@ export async function forceDriftCheck(): Promise<DriftResult> {
 // ─── SWR keys (stable, serialisable) ─────────────────────────────────────────
 
 export const SWR_KEYS = {
-  status:     '/api/status',
+  status: '/api/status',
   migrations: (page: number, limit: number) => `/api/migrations?page=${page}&limit=${limit}`,
-  drift:      '/api/drift',
+  drift: '/api/drift',
 } as const

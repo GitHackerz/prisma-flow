@@ -1,23 +1,23 @@
-import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
 import { StatusCards } from '../app/components/StatusCards'
 import type { ProjectStatus } from '../lib/api'
 
 // Minimal stub for ProjectStatus
 const baseStatus: ProjectStatus = {
-  projectName:       'test-project',
-  schemaPath:        '/project/prisma/schema.prisma',
-  hasMigrations:     true,
-  migrations:        [],
-  pending:           [],
-  failed:            [],
-  driftCount:        0,
-  connected:         true,
+  projectName: 'test-project',
+  schemaPath: '/project/prisma/schema.prisma',
+  hasMigrations: true,
+  migrations: [],
+  pending: [],
+  failed: [],
+  driftCount: 0,
+  connected: true,
   migrationsPending: 0,
   migrationsApplied: 5,
-  migrationsFailed:  0,
-  riskLevel:         'low',
-  lastSync:          new Date().toISOString(),
+  migrationsFailed: 0,
+  riskLevel: 'low',
+  lastSync: new Date().toISOString(),
 }
 
 describe('<StatusCards />', () => {

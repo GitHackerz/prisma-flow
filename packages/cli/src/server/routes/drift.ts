@@ -6,16 +6,19 @@ type Variables = { projectPath: string; requestId: string }
 const app = new Hono<{ Variables: Variables }>()
 
 // In-memory cache so the dashboard's repeated polls don't hammer the DB
-interface CacheEntry { data: Awaited<ReturnType<typeof detectDrift>>; fetchedAt: number }
-const CACHE_TTL_MS = 10_000    // 10 seconds
+interface CacheEntry {
+  data: Awaited<ReturnType<typeof detectDrift>>
+  fetchedAt: number
+}
+const CACHE_TTL_MS = 10_000 // 10 seconds
 let cache: CacheEntry | null = null
 
 function buildPayload(drift: Awaited<ReturnType<typeof detectDrift>>) {
   return {
-    hasDrift:    drift.length > 0,
-    driftCount:  drift.length,
+    hasDrift: drift.length > 0,
+    driftCount: drift.length,
     differences: drift,
-    cachedAt:    cache?.fetchedAt ? new Date(cache.fetchedAt).toISOString() : null,
+    cachedAt: cache?.fetchedAt ? new Date(cache.fetchedAt).toISOString() : null,
   }
 }
 
@@ -40,7 +43,7 @@ app.get('/', async (c) => {
 app.post('/check', async (c) => {
   try {
     const projectPath = c.get('projectPath')
-    const data        = await detectDrift(projectPath)
+    const data = await detectDrift(projectPath)
     cache = { data, fetchedAt: Date.now() }
 
     return c.json({ success: true, message: 'Drift check completed', data: buildPayload(data) })

@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Check, Copy } from "lucide-react"
+import { Check, Copy } from 'lucide-react'
+import { useState } from 'react'
 
 interface CodeBlockProps {
   code: string
@@ -10,7 +10,12 @@ interface CodeBlockProps {
   showLineNumbers?: boolean
 }
 
-export function CodeBlock({ code, language = "bash", filename, showLineNumbers = false }: CodeBlockProps) {
+export function CodeBlock({
+  code,
+  language = 'bash',
+  filename,
+  showLineNumbers = false,
+}: CodeBlockProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -19,7 +24,7 @@ export function CodeBlock({ code, language = "bash", filename, showLineNumbers =
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const lines = code.split("\n")
+  const lines = code.split('\n')
 
   return (
     <div className="group relative overflow-hidden rounded-xl border border-border/50 bg-[hsl(224,71%,4%)]">
@@ -32,11 +37,10 @@ export function CodeBlock({ code, language = "bash", filename, showLineNumbers =
               <div className="h-3 w-3 rounded-full bg-white/10" />
               <div className="h-3 w-3 rounded-full bg-white/10" />
             </div>
-            {filename && (
-              <span className="font-mono text-xs text-white/40">{filename}</span>
-            )}
+            {filename && <span className="font-mono text-xs text-white/40">{filename}</span>}
           </div>
           <button
+            type="button"
             onClick={handleCopy}
             className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-white/40 transition-colors hover:text-white/70"
           >
@@ -59,7 +63,8 @@ export function CodeBlock({ code, language = "bash", filename, showLineNumbers =
       <pre className="overflow-x-auto p-4">
         <code className={`font-mono text-sm leading-7 language-${language}`}>
           {lines.map((line, i) => (
-            <div key={i} className="flex">
+            // biome-ignore lint/suspicious/noArrayIndexKey: code block lines are static and never reorder
+            <div key={`line-${i}`} className="flex">
               {showLineNumbers && (
                 <span className="mr-6 inline-block w-5 text-right text-white/20 select-none">
                   {i + 1}

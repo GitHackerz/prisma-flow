@@ -1,22 +1,16 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import Link from "next/link"
-import {
-  Database,
-  Menu,
-  X,
-  Github,
-  ExternalLink,
-} from "lucide-react"
+import { Database, ExternalLink, Github, Menu, X } from 'lucide-react'
+import Link from 'next/link'
+import { useState } from 'react'
 
 const navLinks = [
-  { label: "Features",      href: "/#features" },
-  { label: "How It Works",  href: "/#how-it-works" },
-  { label: "Installation",  href: "/#installation" },
-  { label: "CLI",           href: "/#cli" },
-  { label: "Pricing",       href: "/#pricing" },
-  { label: "Docs",          href: "/docs" },
+  { label: 'Features', href: '/#features' },
+  { label: 'How It Works', href: '/#how-it-works' },
+  { label: 'Installation', href: '/#installation' },
+  { label: 'CLI', href: '/#cli' },
+  { label: 'Pricing', href: '/#pricing' },
+  { label: 'Docs', href: '/docs' },
 ]
 
 export function Navbar() {
@@ -70,6 +64,7 @@ export function Navbar() {
 
         {/* Mobile menu toggle */}
         <button
+          type="button"
           onClick={() => setOpen(!open)}
           className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground md:hidden"
           aria-label="Toggle menu"

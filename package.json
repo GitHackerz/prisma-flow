@@ -4,35 +4,28 @@
   "engines": {
     "node": ">=20"
   },
-  "workspaces": [
-    "packages/*"
-  ],
+  "packageManager": "npm@10.8.2",
+  "workspaces": ["packages/*"],
   "scripts": {
     "build": "turbo run build",
     "build:cli": "turbo run build --filter=prisma-flow",
     "build:dashboard": "turbo run build --filter=dashboard",
+    "build:website": "turbo run build --filter=website",
     "dev": "turbo run dev --parallel",
+    "dev:cli": "turbo run dev --filter=prisma-flow",
+    "dev:dashboard": "turbo run dev --filter=dashboard",
+    "dev:website": "turbo run dev --filter=website",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "biome format --write .",
+    "format:check": "biome check .",
     "test": "turbo run test",
     "clean": "turbo run clean && rm -rf node_modules",
     "prepare": "husky"
   },
   "devDependencies": {
     "turbo": "^2.3.0",
-    "prettier": "^3.4.0",
     "husky": "^9.1.0",
-    "lint-staged": "^15.0.0"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,yaml,yml}": [
-      "prettier --write"
-    ]
+    "@biomejs/biome": "^1.9.4"
   }
 }

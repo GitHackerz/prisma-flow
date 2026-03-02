@@ -8,7 +8,7 @@ const app = new Hono<{ Variables: Variables }>()
 app.get('/', async (c) => {
   try {
     const projectPath = c.get('projectPath')
-    const schema      = await parseSchema(projectPath)
+    const schema = await parseSchema(projectPath)
 
     return c.json({ success: true, data: schema })
   } catch (error: unknown) {

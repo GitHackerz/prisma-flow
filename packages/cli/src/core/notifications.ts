@@ -1,3 +1,4 @@
+import type { WebhookConfig, WebhookEvent } from '@prisma-flow/shared'
 /**
  * Webhook / notification system.
  *
@@ -10,10 +11,9 @@
  * environment variables (SLACK_WEBHOOK_URL, DISCORD_WEBHOOK_URL).
  */
 import { logger } from '../logger.js'
-import type { WebhookConfig, WebhookEvent } from '@prisma-flow/shared'
 
 export interface NotificationPayload {
-  event:   WebhookEvent
+  event: WebhookEvent
   message: string
   detail?: Record<string, unknown>
 }
@@ -39,37 +39,34 @@ function buildSlackBody(payload: NotificationPayload): string {
 function buildDiscordBody(payload: NotificationPayload): string {
   const emoji = payload.event === 'migration-failed' ? '🔴' : '⚠️'
   return JSON.stringify({
-    content:  `${emoji} **PrismaFlow** — ${payload.message}`,
+    content: `${emoji} **PrismaFlow** — ${payload.message}`,
     username: 'PrismaFlow',
   })
 }
 
 function buildHttpBody(payload: NotificationPayload): string {
   return JSON.stringify({
-    source:    'prismaflow',
-    event:     payload.event,
-    message:   payload.message,
-    detail:    payload.detail ?? {},
+    source: 'prismaflow',
+    event: payload.event,
+    message: payload.message,
+    detail: payload.detail ?? {},
     timestamp: new Date().toISOString(),
   })
 }
 
 // ─── Delivery ─────────────────────────────────────────────────────────────────
 
-async function deliverWebhook(
-  config:  WebhookConfig,
-  payload: NotificationPayload,
-): Promise<void> {
+async function deliverWebhook(config: WebhookConfig, payload: NotificationPayload): Promise<void> {
   let body: string
-  if (config.type === 'slack')   body = buildSlackBody(payload)
+  if (config.type === 'slack') body = buildSlackBody(payload)
   else if (config.type === 'discord') body = buildDiscordBody(payload)
   else body = buildHttpBody(payload)
 
   const res = await fetch(config.url, {
-    method:  'POST',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body,
-    signal:  AbortSignal.timeout(8_000),
+    signal: AbortSignal.timeout(8_000),
   })
 
   if (!res.ok) {
@@ -83,7 +80,7 @@ async function deliverWebhook(
  */
 export async function notify(
   webhooks: WebhookConfig[],
-  payload:  NotificationPayload,
+  payload: NotificationPayload,
 ): Promise<void> {
   const targets = webhooks.filter((w) => {
     if (!w.events || w.events.length === 0) return true
@@ -99,7 +96,7 @@ export async function notify(
         logger.debug({ type: webhook.type, event: payload.event }, 'Webhook delivered')
       } catch (err) {
         logger.warn(
-          { err, type: webhook.type, url: webhook.url.slice(0, 40) + '…' },
+          { err, type: webhook.type, url: `${webhook.url.slice(0, 40)}…` },
           'Webhook delivery failed (non-fatal)',
         )
       }
@@ -111,11 +108,11 @@ export async function notify(
 
 export function buildWebhooksFromEnv(): WebhookConfig[] {
   const webhooks: WebhookConfig[] = []
-  if (process.env['SLACK_WEBHOOK_URL']) {
-    webhooks.push({ type: 'slack', url: process.env['SLACK_WEBHOOK_URL'] })
+  if (process.env.SLACK_WEBHOOK_URL) {
+    webhooks.push({ type: 'slack', url: process.env.SLACK_WEBHOOK_URL })
   }
-  if (process.env['DISCORD_WEBHOOK_URL']) {
-    webhooks.push({ type: 'discord', url: process.env['DISCORD_WEBHOOK_URL'] })
+  if (process.env.DISCORD_WEBHOOK_URL) {
+    webhooks.push({ type: 'discord', url: process.env.DISCORD_WEBHOOK_URL })
   }
   return webhooks
 }

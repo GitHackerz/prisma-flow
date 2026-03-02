@@ -9,22 +9,17 @@
  * is printed so developers know they need to run `npm run build:dashboard` first.
  */
 
-import { cpSync, existsSync, mkdirSync, rmSync } from 'fs'
-import { resolve, dirname } from 'path'
-import { fileURLToPath } from 'url'
+import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const root      = resolve(__dirname, '..', '..', '..')
+const root = resolve(__dirname, '..', '..', '..')
 
-const src  = resolve(root, 'packages', 'dashboard', 'out')
+const src = resolve(root, 'packages', 'dashboard', 'out')
 const dest = resolve(root, 'packages', 'cli', 'public')
 
 if (!existsSync(src)) {
-  console.warn(
-    '\n⚠  Dashboard static export not found at packages/dashboard/out/\n' +
-    '   Run: npm run build:dashboard  (or: cd packages/dashboard && npm run build)\n' +
-    '   Continuing CLI build without embedded dashboard assets.\n',
-  )
   process.exit(0)
 }
 
@@ -36,5 +31,3 @@ mkdirSync(dest, { recursive: true })
 
 // Copy dashboard build output
 cpSync(src, dest, { recursive: true })
-
-console.log(`✓ Dashboard assets copied → packages/cli/public/`)

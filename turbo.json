@@ -4,28 +4,28 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs":    ["src/**", "tsconfig*.json", "package.json"],
-      "outputs":   ["dist/**", "out/**", ".next/**", "!.next/cache/**"]
+      "inputs": ["src/**", "tsconfig*.json", "package.json"],
+      "outputs": ["dist/**", "out/**", ".next/**", "!.next/cache/**"]
     },
     "build:dashboard": {
       "dependsOn": ["dashboard#build"],
-      "outputs":   []
+      "outputs": []
     },
     "dev": {
       "persistent": true,
-      "cache":      false
+      "cache": false
     },
     "typecheck": {
       "dependsOn": ["^build"],
-      "inputs":    ["src/**", "tsconfig*.json"]
+      "inputs": ["src/**", "tsconfig*.json"]
     },
     "lint": {
-      "inputs": ["src/**", "app/**", "lib/**", ".eslintrc*", "eslint.config*"]
+      "inputs": ["src/**", "app/**", "lib/**", "biome.json"]
     },
     "test": {
       "dependsOn": ["^build"],
-      "inputs":    ["src/**", "app/**", "lib/**", "tests/**", "*.test.ts", "*.spec.ts"],
-      "outputs":   ["coverage/**"]
+      "inputs": ["src/**", "app/**", "lib/**", "tests/**", "*.test.ts", "*.spec.ts"],
+      "outputs": ["coverage/**"]
     },
     "clean": {
       "cache": false

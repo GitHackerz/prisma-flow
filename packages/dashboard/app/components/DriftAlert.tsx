@@ -1,11 +1,11 @@
 'use client'
 
 import { AlertTriangle, RefreshCw } from 'lucide-react'
-import useSWR from 'swr'
-import { fetchDrift, forceDriftCheck, SWR_KEYS } from '../../lib/api'
-import type { DriftItem } from '../../lib/api'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import useSWR from 'swr'
+import type { DriftItem } from '../../lib/api'
+import { SWR_KEYS, fetchDrift, forceDriftCheck } from '../../lib/api'
 
 export function DriftAlert() {
   const { data, error, isLoading, mutate } = useSWR(SWR_KEYS.drift, fetchDrift, {
@@ -43,6 +43,7 @@ export function DriftAlert() {
           </h5>
         </div>
         <button
+          type="button"
           onClick={handleForceCheck}
           disabled={checking}
           className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded border border-yellow-500/40 hover:bg-yellow-500/20 disabled:opacity-50"
@@ -59,9 +60,12 @@ export function DriftAlert() {
       {differences.length > 0 && (
         <ul className="mt-2 list-disc pl-5 max-h-32 overflow-y-auto space-y-0.5">
           {differences.map((d, i) => (
-            <li key={i} className="font-mono text-xs py-0.5">
+            <li key={`${i}-${d.type}`} className="font-mono text-xs py-0.5">
               <span className="font-semibold">{d.description}:</span>{' '}
-              <span className="opacity-80 break-all">{d.sql.slice(0, 120)}{d.sql.length > 120 ? '…' : ''}</span>
+              <span className="opacity-80 break-all">
+                {d.sql.slice(0, 120)}
+                {d.sql.length > 120 ? '…' : ''}
+              </span>
             </li>
           ))}
         </ul>

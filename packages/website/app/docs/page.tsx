@@ -1,27 +1,24 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import Link from "next/link"
+import type { LucideIcon } from 'lucide-react'
 import {
-  ChevronRight,
-  BookOpen,
-  Terminal,
-  Globe,
-  Settings,
-  Server,
-  Webhook,
-  Shield,
-  AlertTriangle,
-  HelpCircle,
   BarChart3,
-  Database,
-  Layers,
+  ChevronRight,
   FileCode,
-} from "lucide-react"
-import type { LucideIcon } from "lucide-react"
-import { Navbar } from "../components/Navbar"
-import { Footer } from "../components/Footer"
-import { CodeBlock } from "../components/CodeBlock"
+  Globe,
+  HelpCircle,
+  Layers,
+  Server,
+  Settings,
+  Shield,
+  Terminal,
+  Webhook,
+} from 'lucide-react'
+import Link from 'next/link'
+import { useState } from 'react'
+import { CodeBlock } from '../components/CodeBlock'
+import { Footer } from '../components/Footer'
+import { Navbar } from '../components/Navbar'
 
 /* ─── Sidebar nav data ─── */
 interface NavItem {
@@ -33,111 +30,111 @@ interface NavItem {
 
 const sidebarNav: NavItem[] = [
   {
-    id: "how-it-works",
-    label: "How It Works",
+    id: 'how-it-works',
+    label: 'How It Works',
     icon: Layers,
     children: [
-      { id: "architecture", label: "Architecture" },
-      { id: "data-flow", label: "Data Flow" },
+      { id: 'architecture', label: 'Architecture' },
+      { id: 'data-flow', label: 'Data Flow' },
     ],
   },
   {
-    id: "requirements",
-    label: "Requirements",
+    id: 'requirements',
+    label: 'Requirements',
     icon: Settings,
   },
   {
-    id: "installation",
-    label: "Installation",
+    id: 'installation',
+    label: 'Installation',
     icon: Terminal,
     children: [
-      { id: "zero-install", label: "Zero Install (npx)" },
-      { id: "global-install", label: "Global Install" },
-      { id: "dev-dependency", label: "Dev Dependency" },
+      { id: 'zero-install', label: 'Zero Install (npx)' },
+      { id: 'global-install', label: 'Global Install' },
+      { id: 'dev-dependency', label: 'Dev Dependency' },
     ],
   },
   {
-    id: "cli-reference",
-    label: "CLI Reference",
+    id: 'cli-reference',
+    label: 'CLI Reference',
     icon: Terminal,
     children: [
-      { id: "cmd-dashboard", label: "dashboard" },
-      { id: "cmd-status", label: "status" },
-      { id: "cmd-check", label: "check" },
-      { id: "cmd-init", label: "init" },
-      { id: "cmd-doctor", label: "doctor" },
+      { id: 'cmd-dashboard', label: 'dashboard' },
+      { id: 'cmd-status', label: 'status' },
+      { id: 'cmd-check', label: 'check' },
+      { id: 'cmd-init', label: 'init' },
+      { id: 'cmd-doctor', label: 'doctor' },
     ],
   },
   {
-    id: "web-dashboard",
-    label: "Web Dashboard",
+    id: 'web-dashboard',
+    label: 'Web Dashboard',
     icon: Globe,
     children: [
-      { id: "accessing-dashboard", label: "Accessing" },
-      { id: "status-cards", label: "Status Cards" },
-      { id: "migration-timeline", label: "Timeline" },
-      { id: "migration-list", label: "Migration List" },
-      { id: "drift-alert", label: "Drift Alert" },
-      { id: "health-check", label: "Health Check" },
+      { id: 'accessing-dashboard', label: 'Accessing' },
+      { id: 'status-cards', label: 'Status Cards' },
+      { id: 'migration-timeline', label: 'Timeline' },
+      { id: 'migration-list', label: 'Migration List' },
+      { id: 'drift-alert', label: 'Drift Alert' },
+      { id: 'health-check', label: 'Health Check' },
     ],
   },
   {
-    id: "configuration",
-    label: "Configuration",
+    id: 'configuration',
+    label: 'Configuration',
     icon: Settings,
   },
   {
-    id: "environment-variables",
-    label: "Environment Variables",
+    id: 'environment-variables',
+    label: 'Environment Variables',
     icon: FileCode,
   },
   {
-    id: "api-reference",
-    label: "API Reference",
+    id: 'api-reference',
+    label: 'API Reference',
     icon: Server,
     children: [
-      { id: "api-auth", label: "Authentication" },
-      { id: "api-status", label: "GET /api/status" },
-      { id: "api-migrations", label: "GET /api/migrations" },
-      { id: "api-migration-detail", label: "GET /api/migrations/:name" },
-      { id: "api-drift", label: "GET /api/drift" },
-      { id: "api-drift-check", label: "POST /api/drift/check" },
-      { id: "api-schema", label: "GET /api/schema" },
+      { id: 'api-auth', label: 'Authentication' },
+      { id: 'api-status', label: 'GET /api/status' },
+      { id: 'api-migrations', label: 'GET /api/migrations' },
+      { id: 'api-migration-detail', label: 'GET /api/migrations/:name' },
+      { id: 'api-drift', label: 'GET /api/drift' },
+      { id: 'api-drift-check', label: 'POST /api/drift/check' },
+      { id: 'api-schema', label: 'GET /api/schema' },
     ],
   },
   {
-    id: "cicd-integration",
-    label: "CI/CD Integration",
+    id: 'cicd-integration',
+    label: 'CI/CD Integration',
     icon: BarChart3,
     children: [
-      { id: "github-actions", label: "GitHub Actions" },
-      { id: "gitlab-ci", label: "GitLab CI" },
-      { id: "jenkins", label: "Jenkins" },
+      { id: 'github-actions', label: 'GitHub Actions' },
+      { id: 'gitlab-ci', label: 'GitLab CI' },
+      { id: 'jenkins', label: 'Jenkins' },
     ],
   },
   {
-    id: "docker",
-    label: "Docker",
+    id: 'docker',
+    label: 'Docker',
     icon: Server,
   },
   {
-    id: "webhooks",
-    label: "Webhooks",
+    id: 'webhooks',
+    label: 'Webhooks',
     icon: Webhook,
   },
   {
-    id: "feature-tiers",
-    label: "Feature Tiers",
+    id: 'feature-tiers',
+    label: 'Feature Tiers',
     icon: BarChart3,
   },
   {
-    id: "troubleshooting",
-    label: "Troubleshooting",
+    id: 'troubleshooting',
+    label: 'Troubleshooting',
     icon: HelpCircle,
   },
   {
-    id: "security",
-    label: "Security",
+    id: 'security',
+    label: 'Security',
     icon: Shield,
   },
 ]
@@ -155,12 +152,12 @@ function Sidebar({ active, onSelect }: { active: string; onSelect: (id: string) 
               onClick={(e) => {
                 e.preventDefault()
                 onSelect(item.id)
-                document.getElementById(item.id)?.scrollIntoView({ behavior: "smooth" })
+                document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' })
               }}
               className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
                 isParentActive
-                  ? "bg-primary/10 text-primary font-medium"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? 'bg-primary/10 text-primary font-medium'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               }`}
             >
               <item.icon className="h-4 w-4 shrink-0" />
@@ -175,12 +172,12 @@ function Sidebar({ active, onSelect }: { active: string; onSelect: (id: string) 
                     onClick={(e) => {
                       e.preventDefault()
                       onSelect(child.id)
-                      document.getElementById(child.id)?.scrollIntoView({ behavior: "smooth" })
+                      document.getElementById(child.id)?.scrollIntoView({ behavior: 'smooth' })
                     }}
                     className={`block rounded-md px-2 py-1.5 text-xs transition-colors ${
                       active === child.id
-                        ? "text-primary font-medium"
-                        : "text-muted-foreground hover:text-foreground"
+                        ? 'text-primary font-medium'
+                        : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     {child.label}
@@ -203,11 +200,15 @@ function DocsContent() {
       <section id="how-it-works">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">How It Works</h2>
         <p className="mt-4 text-muted-foreground leading-relaxed">
-          PrismaFlow has two layers that work together: a <strong className="text-foreground">CLI</strong> that wraps the Prisma CLI to analyse your migration
-          state, and a <strong className="text-foreground">web dashboard</strong> that visualises the results in real time.
+          PrismaFlow has two layers that work together: a{' '}
+          <strong className="text-foreground">CLI</strong> that wraps the Prisma CLI to analyse your
+          migration state, and a <strong className="text-foreground">web dashboard</strong> that
+          visualises the results in real time.
         </p>
 
-        <h3 id="architecture" className="mt-10 text-xl font-semibold text-foreground">Architecture</h3>
+        <h3 id="architecture" className="mt-10 text-xl font-semibold text-foreground">
+          Architecture
+        </h3>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -247,7 +248,9 @@ function DocsContent() {
           </table>
         </div>
 
-        <h3 id="data-flow" className="mt-10 text-xl font-semibold text-foreground">Data Flow</h3>
+        <h3 id="data-flow" className="mt-10 text-xl font-semibold text-foreground">
+          Data Flow
+        </h3>
         <div className="mt-4">
           <CodeBlock
             filename="data-flow.txt"
@@ -314,7 +317,10 @@ function DocsContent() {
           </table>
         </div>
         <div className="mt-4 rounded-xl border border-border/50 bg-card/50 p-4 text-sm text-muted-foreground">
-          <strong className="text-foreground">Note:</strong> PrismaFlow does not install itself as a Prisma dependency. It wraps the Prisma CLI via <code className="rounded bg-muted px-1.5 py-0.5 text-xs">npx prisma ...</code> so it follows whatever version your project uses.
+          <strong className="text-foreground">Note:</strong> PrismaFlow does not install itself as a
+          Prisma dependency. It wraps the Prisma CLI via{' '}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">npx prisma ...</code> so it
+          follows whatever version your project uses.
         </div>
       </section>
 
@@ -322,22 +328,45 @@ function DocsContent() {
       <section id="installation">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">Installation</h2>
 
-        <h3 id="zero-install" className="mt-10 text-xl font-semibold text-foreground">Option A — Zero Install (recommended)</h3>
-        <p className="mt-3 text-muted-foreground">Download and run in one command. Nothing persisted globally.</p>
+        <h3 id="zero-install" className="mt-10 text-xl font-semibold text-foreground">
+          Option A — Zero Install (recommended)
+        </h3>
+        <p className="mt-3 text-muted-foreground">
+          Download and run in one command. Nothing persisted globally.
+        </p>
         <div className="mt-4">
-          <CodeBlock filename="terminal" code={`cd /path/to/your-prisma-project\nnpx prisma-flow`} />
+          <CodeBlock
+            filename="terminal"
+            code={'cd /path/to/your-prisma-project\nnpx prisma-flow'}
+          />
         </div>
 
-        <h3 id="global-install" className="mt-10 text-xl font-semibold text-foreground">Option B — Global Install</h3>
+        <h3 id="global-install" className="mt-10 text-xl font-semibold text-foreground">
+          Option B — Global Install
+        </h3>
         <p className="mt-3 text-muted-foreground">Install once, use from any Prisma project.</p>
         <div className="mt-4">
-          <CodeBlock filename="terminal" code={`npm install -g prisma-flow\n\n# Then from any project:\ncd /path/to/your-project\nprisma-flow`} />
+          <CodeBlock
+            filename="terminal"
+            code={
+              'npm install -g prisma-flow\n\n# Then from any project:\ncd /path/to/your-project\nprisma-flow'
+            }
+          />
         </div>
 
-        <h3 id="dev-dependency" className="mt-10 text-xl font-semibold text-foreground">Option C — Dev Dependency</h3>
-        <p className="mt-3 text-muted-foreground">Pin the version for your team and add convenience scripts.</p>
+        <h3 id="dev-dependency" className="mt-10 text-xl font-semibold text-foreground">
+          Option C — Dev Dependency
+        </h3>
+        <p className="mt-3 text-muted-foreground">
+          Pin the version for your team and add convenience scripts.
+        </p>
         <div className="mt-4">
-          <CodeBlock filename="terminal" code={`npm install --save-dev prisma-flow\n# or: yarn add --dev prisma-flow\n# or: pnpm add -D prisma-flow`} />
+          <CodeBlock
+            filename="terminal"
+            code={
+              'npm install --save-dev prisma-flow\n# or: yarn add --dev prisma-flow\n# or: pnpm add -D prisma-flow'
+            }
+          />
         </div>
         <p className="mt-4 text-sm text-muted-foreground">Then add scripts to your package.json:</p>
         <div className="mt-3">
@@ -358,18 +387,30 @@ function DocsContent() {
       {/* CLI Reference */}
       <section id="cli-reference">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">CLI Reference</h2>
-        <p className="mt-4 text-muted-foreground">All commands are run from inside your Prisma project root (the directory containing <code className="rounded bg-muted px-1.5 py-0.5 text-xs">prisma/</code>).</p>
+        <p className="mt-4 text-muted-foreground">
+          All commands are run from inside your Prisma project root (the directory containing{' '}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">prisma/</code>).
+        </p>
 
         <div className="mt-6">
-          <CodeBlock filename="terminal" code={`Usage: prisma-flow [command] [options]\n\nCommands:\n  dashboard  Launch the visual dashboard (default)\n  status     Print migration & drift status\n  check      Validate state for CI/CD\n  init       Create prismaflow.config.ts\n  doctor     Validate environment & project setup`} />
+          <CodeBlock
+            filename="terminal"
+            code={
+              'Usage: prisma-flow [command] [options]\n\nCommands:\n  dashboard  Launch the visual dashboard (default)\n  status     Print migration & drift status\n  check      Validate state for CI/CD\n  init       Create prismaflow.config.ts\n  doctor     Validate environment & project setup'
+            }
+          />
         </div>
 
         {/* dashboard */}
         <h3 id="cmd-dashboard" className="mt-12 text-xl font-semibold text-foreground">
-          <code className="rounded-md bg-primary/10 px-2.5 py-1 font-mono text-primary">dashboard</code>
+          <code className="rounded-md bg-primary/10 px-2.5 py-1 font-mono text-primary">
+            dashboard
+          </code>
           <span className="ml-2 text-sm font-normal text-muted-foreground">(default command)</span>
         </h3>
-        <p className="mt-3 text-muted-foreground">Launches the HTTP server and opens the visual dashboard in your browser.</p>
+        <p className="mt-3 text-muted-foreground">
+          Launches the HTTP server and opens the visual dashboard in your browser.
+        </p>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -394,14 +435,24 @@ function DocsContent() {
           </table>
         </div>
         <div className="mt-4">
-          <CodeBlock filename="examples" code={`# Default — opens http://localhost:5555\nnpx prisma-flow\n\n# Custom port\nnpx prisma-flow --port 7777\n\n# Headless (no browser)\nnpx prisma-flow --no-open`} />
+          <CodeBlock
+            filename="examples"
+            code={
+              '# Default — opens http://localhost:5555\nnpx prisma-flow\n\n# Custom port\nnpx prisma-flow --port 7777\n\n# Headless (no browser)\nnpx prisma-flow --no-open'
+            }
+          />
         </div>
 
         {/* status */}
         <h3 id="cmd-status" className="mt-12 text-xl font-semibold text-foreground">
-          <code className="rounded-md bg-primary/10 px-2.5 py-1 font-mono text-primary">status</code>
+          <code className="rounded-md bg-primary/10 px-2.5 py-1 font-mono text-primary">
+            status
+          </code>
         </h3>
-        <p className="mt-3 text-muted-foreground">Prints a human-readable or JSON summary of migration and drift state. Does not start a server.</p>
+        <p className="mt-3 text-muted-foreground">
+          Prints a human-readable or JSON summary of migration and drift state. Does not start a
+          server.
+        </p>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -439,7 +490,9 @@ function DocsContent() {
         <h3 id="cmd-check" className="mt-12 text-xl font-semibold text-foreground">
           <code className="rounded-md bg-primary/10 px-2.5 py-1 font-mono text-primary">check</code>
         </h3>
-        <p className="mt-3 text-muted-foreground">Validates migration state and exits with a structured exit code. Designed for CI/CD.</p>
+        <p className="mt-3 text-muted-foreground">
+          Validates migration state and exits with a structured exit code. Designed for CI/CD.
+        </p>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -450,32 +503,68 @@ function DocsContent() {
               </tr>
             </thead>
             <tbody className="text-muted-foreground">
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono">0</td><td className="py-2 pr-4">Healthy</td><td className="py-2">No pending, no drift, no failures</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono">1</td><td className="py-2 pr-4">Pending migrations</td><td className="py-2">Unapplied migrations exist</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono">2</td><td className="py-2 pr-4">Schema drift</td><td className="py-2">Database differs from migration history</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono">3</td><td className="py-2 pr-4">Failed migrations</td><td className="py-2">At least one migration failed</td></tr>
-              <tr><td className="py-2 pr-4 font-mono">4</td><td className="py-2 pr-4">Runtime error</td><td className="py-2">Cannot connect, no project found, etc.</td></tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono">0</td>
+                <td className="py-2 pr-4">Healthy</td>
+                <td className="py-2">No pending, no drift, no failures</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono">1</td>
+                <td className="py-2 pr-4">Pending migrations</td>
+                <td className="py-2">Unapplied migrations exist</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono">2</td>
+                <td className="py-2 pr-4">Schema drift</td>
+                <td className="py-2">Database differs from migration history</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono">3</td>
+                <td className="py-2 pr-4">Failed migrations</td>
+                <td className="py-2">At least one migration failed</td>
+              </tr>
+              <tr>
+                <td className="py-2 pr-4 font-mono">4</td>
+                <td className="py-2 pr-4">Runtime error</td>
+                <td className="py-2">Cannot connect, no project found, etc.</td>
+              </tr>
             </tbody>
           </table>
         </div>
         <div className="mt-4">
-          <CodeBlock filename="terminal" code={`# Fail pipeline on any issue\nnpx prisma-flow check --ci\n\n# Output JSON for scripting\nnpx prisma-flow check --ci --json`} />
+          <CodeBlock
+            filename="terminal"
+            code={
+              '# Fail pipeline on any issue\nnpx prisma-flow check --ci\n\n# Output JSON for scripting\nnpx prisma-flow check --ci --json'
+            }
+          />
         </div>
 
         {/* init */}
         <h3 id="cmd-init" className="mt-12 text-xl font-semibold text-foreground">
           <code className="rounded-md bg-primary/10 px-2.5 py-1 font-mono text-primary">init</code>
         </h3>
-        <p className="mt-3 text-muted-foreground">Creates a <code className="rounded bg-muted px-1.5 py-0.5 text-xs">prismaflow.config.ts</code> with all available options documented inline.</p>
+        <p className="mt-3 text-muted-foreground">
+          Creates a{' '}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">prismaflow.config.ts</code> with
+          all available options documented inline.
+        </p>
         <div className="mt-4">
-          <CodeBlock filename="terminal" code={`prisma-flow init\n\n# Overwrite existing config:\nprisma-flow init --force`} />
+          <CodeBlock
+            filename="terminal"
+            code={'prisma-flow init\n\n# Overwrite existing config:\nprisma-flow init --force'}
+          />
         </div>
 
         {/* doctor */}
         <h3 id="cmd-doctor" className="mt-12 text-xl font-semibold text-foreground">
-          <code className="rounded-md bg-primary/10 px-2.5 py-1 font-mono text-primary">doctor</code>
+          <code className="rounded-md bg-primary/10 px-2.5 py-1 font-mono text-primary">
+            doctor
+          </code>
         </h3>
-        <p className="mt-3 text-muted-foreground">Runs environment checks and reports results. Useful for first-time setup or debugging.</p>
+        <p className="mt-3 text-muted-foreground">
+          Runs environment checks and reports results. Useful for first-time setup or debugging.
+        </p>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -485,12 +574,30 @@ function DocsContent() {
               </tr>
             </thead>
             <tbody className="text-muted-foreground">
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">Node.js &ge; 20</td><td className="py-2">process.versions.node</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">Prisma CLI available</td><td className="py-2">npx prisma --version resolves</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">Schema found</td><td className="py-2">prisma/schema.prisma exists</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">DATABASE_URL set</td><td className="py-2">In .env, prisma/.env, or env</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">Migrations dir exists</td><td className="py-2">prisma/migrations/ present</td></tr>
-              <tr><td className="py-2 pr-4">Database reachable</td><td className="py-2">prisma migrate status succeeds</td></tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">Node.js &ge; 20</td>
+                <td className="py-2">process.versions.node</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">Prisma CLI available</td>
+                <td className="py-2">npx prisma --version resolves</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">Schema found</td>
+                <td className="py-2">prisma/schema.prisma exists</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">DATABASE_URL set</td>
+                <td className="py-2">In .env, prisma/.env, or env</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">Migrations dir exists</td>
+                <td className="py-2">prisma/migrations/ present</td>
+              </tr>
+              <tr>
+                <td className="py-2 pr-4">Database reachable</td>
+                <td className="py-2">prisma migrate status succeeds</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -500,14 +607,26 @@ function DocsContent() {
       <section id="web-dashboard">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">Web Dashboard Guide</h2>
 
-        <h3 id="accessing-dashboard" className="mt-10 text-xl font-semibold text-foreground">Accessing the Dashboard</h3>
+        <h3 id="accessing-dashboard" className="mt-10 text-xl font-semibold text-foreground">
+          Accessing the Dashboard
+        </h3>
         <ol className="mt-4 space-y-2 text-muted-foreground list-decimal list-inside">
-          <li>Run <code className="rounded bg-muted px-1.5 py-0.5 text-xs">prisma-flow</code> from your project root</li>
-          <li>Your browser opens automatically at <code className="rounded bg-muted px-1.5 py-0.5 text-xs">http://localhost:5555?token=&lt;token&gt;</code></li>
+          <li>
+            Run <code className="rounded bg-muted px-1.5 py-0.5 text-xs">prisma-flow</code> from
+            your project root
+          </li>
+          <li>
+            Your browser opens automatically at{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+              http://localhost:5555?token=&lt;token&gt;
+            </code>
+          </li>
           <li>If the browser does not open (headless/remote), copy the URL from the terminal</li>
         </ol>
         <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-muted-foreground">
-          <strong className="text-amber-400">Important:</strong> The <code className="rounded bg-muted px-1.5 py-0.5 text-xs">?token=</code> query parameter is required. Without it, API requests return 401 and the dashboard shows a connection error.
+          <strong className="text-amber-400">Important:</strong> The{' '}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">?token=</code> query parameter is
+          required. Without it, API requests return 401 and the dashboard shows a connection error.
         </div>
         <div className="mt-4 text-sm text-muted-foreground">
           <strong className="text-foreground">Remote / SSH access:</strong>
@@ -516,8 +635,12 @@ function DocsContent() {
           <CodeBlock filename="terminal" code="ssh -L 5555:localhost:5555 user@your-server" />
         </div>
 
-        <h3 id="status-cards" className="mt-10 text-xl font-semibold text-foreground">Status Cards</h3>
-        <p className="mt-3 text-muted-foreground">Four cards at the top update every <strong className="text-foreground">5 seconds</strong>:</p>
+        <h3 id="status-cards" className="mt-10 text-xl font-semibold text-foreground">
+          Status Cards
+        </h3>
+        <p className="mt-3 text-muted-foreground">
+          Four cards at the top update every <strong className="text-foreground">5 seconds</strong>:
+        </p>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -528,21 +651,47 @@ function DocsContent() {
               </tr>
             </thead>
             <tbody className="text-muted-foreground">
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">Database Status</td><td className="py-2 pr-4">Connected</td><td className="py-2">Cannot reach DB</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">Pending Migrations</td><td className="py-2 pr-4">0 pending</td><td className="py-2">Unapplied migrations exist</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">Failed Migrations</td><td className="py-2 pr-4">0 failed</td><td className="py-2">Manual recovery needed</td></tr>
-              <tr><td className="py-2 pr-4">Risk Level</td><td className="py-2 pr-4">low</td><td className="py-2">medium = drift; high = failed</td></tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">Database Status</td>
+                <td className="py-2 pr-4">Connected</td>
+                <td className="py-2">Cannot reach DB</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">Pending Migrations</td>
+                <td className="py-2 pr-4">0 pending</td>
+                <td className="py-2">Unapplied migrations exist</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">Failed Migrations</td>
+                <td className="py-2 pr-4">0 failed</td>
+                <td className="py-2">Manual recovery needed</td>
+              </tr>
+              <tr>
+                <td className="py-2 pr-4">Risk Level</td>
+                <td className="py-2 pr-4">low</td>
+                <td className="py-2">medium = drift; high = failed</td>
+              </tr>
             </tbody>
           </table>
         </div>
 
-        <h3 id="migration-timeline" className="mt-10 text-xl font-semibold text-foreground">Migration Timeline</h3>
+        <h3 id="migration-timeline" className="mt-10 text-xl font-semibold text-foreground">
+          Migration Timeline
+        </h3>
         <p className="mt-3 text-muted-foreground">
-          A horizontal visual timeline showing all migrations chronologically. <strong className="text-foreground">Filled dots</strong> = applied, <strong className="text-foreground">empty dots</strong> = pending, <strong className="text-red-400">red dots</strong> = failed. Updates every 10 seconds.
+          A horizontal visual timeline showing all migrations chronologically.{' '}
+          <strong className="text-foreground">Filled dots</strong> = applied,{' '}
+          <strong className="text-foreground">empty dots</strong> = pending,{' '}
+          <strong className="text-red-400">red dots</strong> = failed. Updates every 10 seconds.
         </p>
 
-        <h3 id="migration-list" className="mt-10 text-xl font-semibold text-foreground">Migration List</h3>
-        <p className="mt-3 text-muted-foreground">A scrollable table (newest first) showing name, status badge, applied-at timestamp, and risk badges.</p>
+        <h3 id="migration-list" className="mt-10 text-xl font-semibold text-foreground">
+          Migration List
+        </h3>
+        <p className="mt-3 text-muted-foreground">
+          A scrollable table (newest first) showing name, status badge, applied-at timestamp, and
+          risk badges.
+        </p>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -552,23 +701,48 @@ function DocsContent() {
               </tr>
             </thead>
             <tbody className="text-muted-foreground">
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">Drops table</td><td className="py-2">DROP TABLE</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">Drops column</td><td className="py-2">DROP COLUMN</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">Bulk deletion</td><td className="py-2">DELETE FROM</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">Truncates</td><td className="py-2">TRUNCATE</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">Alters structure</td><td className="py-2">ALTER TABLE</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">Removes index</td><td className="py-2">DROP INDEX</td></tr>
-              <tr><td className="py-2 pr-4">Removes constraint</td><td className="py-2">DROP CONSTRAINT</td></tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">Drops table</td>
+                <td className="py-2">DROP TABLE</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">Drops column</td>
+                <td className="py-2">DROP COLUMN</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">Bulk deletion</td>
+                <td className="py-2">DELETE FROM</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">Truncates</td>
+                <td className="py-2">TRUNCATE</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">Alters structure</td>
+                <td className="py-2">ALTER TABLE</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">Removes index</td>
+                <td className="py-2">DROP INDEX</td>
+              </tr>
+              <tr>
+                <td className="py-2 pr-4">Removes constraint</td>
+                <td className="py-2">DROP CONSTRAINT</td>
+              </tr>
             </tbody>
           </table>
         </div>
 
-        <h3 id="drift-alert" className="mt-10 text-xl font-semibold text-foreground">Drift Alert</h3>
+        <h3 id="drift-alert" className="mt-10 text-xl font-semibold text-foreground">
+          Drift Alert
+        </h3>
         <p className="mt-3 text-muted-foreground">
-          An amber banner that appears only when schema drift is confirmed. Lists the SQL differences and provides a <strong className="text-foreground">Re-check</strong> button.
+          An amber banner that appears only when schema drift is confirmed. Lists the SQL
+          differences and provides a <strong className="text-foreground">Re-check</strong> button.
         </p>
         <div className="mt-4 text-sm text-muted-foreground">
-          <strong className="text-foreground">What causes drift?</strong> Direct ALTER TABLE by a DBA, seed scripts creating unknown tables, editing migrations after they were applied.
+          <strong className="text-foreground">What causes drift?</strong> Direct ALTER TABLE by a
+          DBA, seed scripts creating unknown tables, editing migrations after they were applied.
         </div>
         <div className="mt-4 text-sm text-muted-foreground">
           <strong className="text-foreground">How to fix:</strong>
@@ -576,13 +750,22 @@ function DocsContent() {
         <ol className="mt-2 space-y-1.5 text-sm text-muted-foreground list-decimal list-inside">
           <li>Click Re-check to confirm it&apos;s not stale cache</li>
           <li>Review the listed SQL differences</li>
-          <li>Create a migration: <code className="rounded bg-muted px-1.5 py-0.5 text-xs">prisma migrate dev --name fix_drift</code></li>
+          <li>
+            Create a migration:{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+              prisma migrate dev --name fix_drift
+            </code>
+          </li>
           <li>Or revert the manual DB change and re-apply via migration</li>
         </ol>
 
-        <h3 id="health-check" className="mt-10 text-xl font-semibold text-foreground">Health Check Panel</h3>
+        <h3 id="health-check" className="mt-10 text-xl font-semibold text-foreground">
+          Health Check Panel
+        </h3>
         <p className="mt-3 text-muted-foreground">
-          Live-updating panel showing connection status, applied/pending/failed counts, and drift count — equivalent to <code className="rounded bg-muted px-1.5 py-0.5 text-xs">prisma-flow status</code>.
+          Live-updating panel showing connection status, applied/pending/failed counts, and drift
+          count — equivalent to{' '}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">prisma-flow status</code>.
         </p>
       </section>
 
@@ -590,7 +773,8 @@ function DocsContent() {
       <section id="configuration">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">Configuration</h2>
         <p className="mt-4 text-muted-foreground">
-          Run <code className="rounded bg-muted px-1.5 py-0.5 text-xs">prisma-flow init</code> to create a config file. It is optional — PrismaFlow works without it.
+          Run <code className="rounded bg-muted px-1.5 py-0.5 text-xs">prisma-flow init</code> to
+          create a config file. It is optional — PrismaFlow works without it.
         </p>
         <div className="mt-6">
           <CodeBlock
@@ -626,7 +810,9 @@ export default config`}
       {/* Environment Variables */}
       <section id="environment-variables">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">Environment Variables</h2>
-        <p className="mt-4 text-muted-foreground">All environment variables override config file values.</p>
+        <p className="mt-4 text-muted-foreground">
+          All environment variables override config file values.
+        </p>
         <div className="mt-6 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -637,14 +823,48 @@ export default config`}
               </tr>
             </thead>
             <tbody className="text-muted-foreground">
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono text-xs">DATABASE_URL</td><td className="py-2 pr-4">—</td><td className="py-2"><strong className="text-foreground">Required.</strong> Prisma connection string</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_PORT</td><td className="py-2 pr-4">5555</td><td className="py-2">Dashboard HTTP port</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_LOG_LEVEL</td><td className="py-2 pr-4">info</td><td className="py-2">trace/debug/info/warn/error</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_OPEN_BROWSER</td><td className="py-2 pr-4">true</td><td className="py-2">Set false for headless</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_TELEMETRY</td><td className="py-2 pr-4">on</td><td className="py-2">Set off to opt out</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_LICENCE_KEY</td><td className="py-2 pr-4">—</td><td className="py-2">Unlock Pro/Enterprise features</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_WEBHOOK_SLACK_URL</td><td className="py-2 pr-4">—</td><td className="py-2">Slack incoming webhook URL</td></tr>
-              <tr><td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_WEBHOOK_DISCORD_URL</td><td className="py-2 pr-4">—</td><td className="py-2">Discord webhook URL</td></tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono text-xs">DATABASE_URL</td>
+                <td className="py-2 pr-4">—</td>
+                <td className="py-2">
+                  <strong className="text-foreground">Required.</strong> Prisma connection string
+                </td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_PORT</td>
+                <td className="py-2 pr-4">5555</td>
+                <td className="py-2">Dashboard HTTP port</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_LOG_LEVEL</td>
+                <td className="py-2 pr-4">info</td>
+                <td className="py-2">trace/debug/info/warn/error</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_OPEN_BROWSER</td>
+                <td className="py-2 pr-4">true</td>
+                <td className="py-2">Set false for headless</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_TELEMETRY</td>
+                <td className="py-2 pr-4">on</td>
+                <td className="py-2">Set off to opt out</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_LICENCE_KEY</td>
+                <td className="py-2 pr-4">—</td>
+                <td className="py-2">Unlock Pro/Enterprise features</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_WEBHOOK_SLACK_URL</td>
+                <td className="py-2 pr-4">—</td>
+                <td className="py-2">Slack incoming webhook URL</td>
+              </tr>
+              <tr>
+                <td className="py-2 pr-4 font-mono text-xs">PRISMAFLOW_WEBHOOK_DISCORD_URL</td>
+                <td className="py-2 pr-4">—</td>
+                <td className="py-2">Discord webhook URL</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -654,19 +874,40 @@ export default config`}
       <section id="api-reference">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">API Reference</h2>
         <p className="mt-4 text-muted-foreground">
-          The Hono server exposes a REST API at <code className="rounded bg-muted px-1.5 py-0.5 text-xs">http://localhost:&lt;port&gt;/api/*</code>.
+          The Hono server exposes a REST API at{' '}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+            http://localhost:&lt;port&gt;/api/*
+          </code>
+          .
         </p>
 
-        <h3 id="api-auth" className="mt-10 text-xl font-semibold text-foreground">Authentication</h3>
-        <p className="mt-3 text-muted-foreground">Every <code className="rounded bg-muted px-1.5 py-0.5 text-xs">/api/*</code> request requires a valid session token:</p>
+        <h3 id="api-auth" className="mt-10 text-xl font-semibold text-foreground">
+          Authentication
+        </h3>
+        <p className="mt-3 text-muted-foreground">
+          Every <code className="rounded bg-muted px-1.5 py-0.5 text-xs">/api/*</code> request
+          requires a valid session token:
+        </p>
         <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground list-disc list-inside">
           <li>Generated fresh each start (48 hex chars, 192-bit entropy)</li>
-          <li>Sent as <code className="rounded bg-muted px-1.5 py-0.5 text-xs">Authorization: Bearer &lt;token&gt;</code> header</li>
-          <li>Or as <code className="rounded bg-muted px-1.5 py-0.5 text-xs">?token=&lt;token&gt;</code> query parameter</li>
+          <li>
+            Sent as{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+              Authorization: Bearer &lt;token&gt;
+            </code>{' '}
+            header
+          </li>
+          <li>
+            Or as{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 text-xs">?token=&lt;token&gt;</code>{' '}
+            query parameter
+          </li>
         </ul>
 
         <h3 id="api-status" className="mt-10 text-xl font-semibold text-foreground">
-          <span className="mr-2 inline-block rounded-md bg-emerald-500/10 px-2 py-0.5 font-mono text-xs text-emerald-400">GET</span>
+          <span className="mr-2 inline-block rounded-md bg-emerald-500/10 px-2 py-0.5 font-mono text-xs text-emerald-400">
+            GET
+          </span>
           /api/status
         </h3>
         <p className="mt-3 text-muted-foreground">Returns overall project and database health.</p>
@@ -691,10 +932,17 @@ export default config`}
         </div>
 
         <h3 id="api-migrations" className="mt-10 text-xl font-semibold text-foreground">
-          <span className="mr-2 inline-block rounded-md bg-emerald-500/10 px-2 py-0.5 font-mono text-xs text-emerald-400">GET</span>
+          <span className="mr-2 inline-block rounded-md bg-emerald-500/10 px-2 py-0.5 font-mono text-xs text-emerald-400">
+            GET
+          </span>
           /api/migrations
         </h3>
-        <p className="mt-3 text-muted-foreground">Paginated migration list. Params: <code className="rounded bg-muted px-1.5 py-0.5 text-xs">page</code> (default 1), <code className="rounded bg-muted px-1.5 py-0.5 text-xs">limit</code> (default 20, max 100).</p>
+        <p className="mt-3 text-muted-foreground">
+          Paginated migration list. Params:{' '}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">page</code> (default 1),{' '}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">limit</code> (default 20, max
+          100).
+        </p>
         <div className="mt-4">
           <CodeBlock
             filename="response"
@@ -717,16 +965,24 @@ export default config`}
         </div>
 
         <h3 id="api-migration-detail" className="mt-10 text-xl font-semibold text-foreground">
-          <span className="mr-2 inline-block rounded-md bg-emerald-500/10 px-2 py-0.5 font-mono text-xs text-emerald-400">GET</span>
+          <span className="mr-2 inline-block rounded-md bg-emerald-500/10 px-2 py-0.5 font-mono text-xs text-emerald-400">
+            GET
+          </span>
           /api/migrations/:name
         </h3>
-        <p className="mt-3 text-muted-foreground">Full SQL content and risk analysis for a single migration.</p>
+        <p className="mt-3 text-muted-foreground">
+          Full SQL content and risk analysis for a single migration.
+        </p>
 
         <h3 id="api-drift" className="mt-10 text-xl font-semibold text-foreground">
-          <span className="mr-2 inline-block rounded-md bg-emerald-500/10 px-2 py-0.5 font-mono text-xs text-emerald-400">GET</span>
+          <span className="mr-2 inline-block rounded-md bg-emerald-500/10 px-2 py-0.5 font-mono text-xs text-emerald-400">
+            GET
+          </span>
           /api/drift
         </h3>
-        <p className="mt-3 text-muted-foreground">Current drift state. Cached for 10 seconds to avoid repeated database hits.</p>
+        <p className="mt-3 text-muted-foreground">
+          Current drift state. Cached for 10 seconds to avoid repeated database hits.
+        </p>
         <div className="mt-4">
           <CodeBlock
             filename="response"
@@ -758,27 +1014,54 @@ export default config`}
               </tr>
             </thead>
             <tbody className="text-muted-foreground">
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono text-xs">table-missing</td><td className="py-2">CREATE TABLE in diff</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono text-xs">table-extra</td><td className="py-2">DROP TABLE in diff</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono text-xs">column-mismatch</td><td className="py-2">ALTER TABLE (no CONSTRAINT)</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono text-xs">index-change</td><td className="py-2">CREATE/DROP/ALTER INDEX</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4 font-mono text-xs">constraint-change</td><td className="py-2">CONSTRAINT statement</td></tr>
-              <tr><td className="py-2 pr-4 font-mono text-xs">unknown</td><td className="py-2">Anything else</td></tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono text-xs">table-missing</td>
+                <td className="py-2">CREATE TABLE in diff</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono text-xs">table-extra</td>
+                <td className="py-2">DROP TABLE in diff</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono text-xs">column-mismatch</td>
+                <td className="py-2">ALTER TABLE (no CONSTRAINT)</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono text-xs">index-change</td>
+                <td className="py-2">CREATE/DROP/ALTER INDEX</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4 font-mono text-xs">constraint-change</td>
+                <td className="py-2">CONSTRAINT statement</td>
+              </tr>
+              <tr>
+                <td className="py-2 pr-4 font-mono text-xs">unknown</td>
+                <td className="py-2">Anything else</td>
+              </tr>
             </tbody>
           </table>
         </div>
 
         <h3 id="api-drift-check" className="mt-10 text-xl font-semibold text-foreground">
-          <span className="mr-2 inline-block rounded-md bg-amber-500/10 px-2 py-0.5 font-mono text-xs text-amber-400">POST</span>
+          <span className="mr-2 inline-block rounded-md bg-amber-500/10 px-2 py-0.5 font-mono text-xs text-amber-400">
+            POST
+          </span>
           /api/drift/check
         </h3>
-        <p className="mt-3 text-muted-foreground">Force-refresh drift analysis, bypassing the 10-second cache. Same response shape as GET /api/drift.</p>
+        <p className="mt-3 text-muted-foreground">
+          Force-refresh drift analysis, bypassing the 10-second cache. Same response shape as GET
+          /api/drift.
+        </p>
 
         <h3 id="api-schema" className="mt-10 text-xl font-semibold text-foreground">
-          <span className="mr-2 inline-block rounded-md bg-emerald-500/10 px-2 py-0.5 font-mono text-xs text-emerald-400">GET</span>
+          <span className="mr-2 inline-block rounded-md bg-emerald-500/10 px-2 py-0.5 font-mono text-xs text-emerald-400">
+            GET
+          </span>
           /api/schema
         </h3>
-        <p className="mt-3 text-muted-foreground">Parsed Prisma schema — all models and enums as structured data.</p>
+        <p className="mt-3 text-muted-foreground">
+          Parsed Prisma schema — all models and enums as structured data.
+        </p>
 
         <h4 className="mt-8 text-lg font-semibold text-foreground">Error Responses</h4>
         <div className="mt-4">
@@ -800,9 +1083,18 @@ export default config`}
               </tr>
             </thead>
             <tbody className="text-muted-foreground">
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">401</td><td className="py-2">Missing or invalid auth token</td></tr>
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">404</td><td className="py-2">Migration name not found</td></tr>
-              <tr><td className="py-2 pr-4">500</td><td className="py-2">Unexpected server error</td></tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">401</td>
+                <td className="py-2">Missing or invalid auth token</td>
+              </tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">404</td>
+                <td className="py-2">Migration name not found</td>
+              </tr>
+              <tr>
+                <td className="py-2 pr-4">500</td>
+                <td className="py-2">Unexpected server error</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -812,7 +1104,9 @@ export default config`}
       <section id="cicd-integration">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">CI/CD Integration</h2>
 
-        <h3 id="github-actions" className="mt-10 text-xl font-semibold text-foreground">GitHub Actions</h3>
+        <h3 id="github-actions" className="mt-10 text-xl font-semibold text-foreground">
+          GitHub Actions
+        </h3>
         <div className="mt-4">
           <CodeBlock
             filename=".github/workflows/deploy.yml"
@@ -844,7 +1138,9 @@ jobs:
           />
         </div>
 
-        <h3 id="gitlab-ci" className="mt-10 text-xl font-semibold text-foreground">GitLab CI</h3>
+        <h3 id="gitlab-ci" className="mt-10 text-xl font-semibold text-foreground">
+          GitLab CI
+        </h3>
         <div className="mt-4">
           <CodeBlock
             filename=".gitlab-ci.yml"
@@ -865,7 +1161,9 @@ jobs:
           />
         </div>
 
-        <h3 id="jenkins" className="mt-10 text-xl font-semibold text-foreground">Jenkins</h3>
+        <h3 id="jenkins" className="mt-10 text-xl font-semibold text-foreground">
+          Jenkins
+        </h3>
         <div className="mt-4">
           <CodeBlock
             filename="Jenkinsfile"
@@ -911,11 +1209,15 @@ docker run --rm \\
         </div>
 
         <h3 className="mt-10 text-xl font-semibold text-foreground">Docker Compose</h3>
-        <p className="mt-3 text-muted-foreground">The included docker-compose.yml starts PrismaFlow plus a local Postgres instance:</p>
+        <p className="mt-3 text-muted-foreground">
+          The included docker-compose.yml starts PrismaFlow plus a local Postgres instance:
+        </p>
         <div className="mt-4">
           <CodeBlock
             filename="terminal"
-            code={`docker compose up -d\ndocker compose logs -f prisma-flow  # get the auth token\ndocker compose down`}
+            code={
+              'docker compose up -d\ndocker compose logs -f prisma-flow  # get the auth token\ndocker compose down'
+            }
           />
         </div>
         <div className="mt-4 overflow-x-auto">
@@ -927,8 +1229,14 @@ docker run --rm \\
               </tr>
             </thead>
             <tbody className="text-muted-foreground">
-              <tr className="border-b border-border/30"><td className="py-2 pr-4">PrismaFlow dashboard</td><td className="py-2">5555</td></tr>
-              <tr><td className="py-2 pr-4">Postgres</td><td className="py-2">5433 (avoids local pg conflicts)</td></tr>
+              <tr className="border-b border-border/30">
+                <td className="py-2 pr-4">PrismaFlow dashboard</td>
+                <td className="py-2">5555</td>
+              </tr>
+              <tr>
+                <td className="py-2 pr-4">Postgres</td>
+                <td className="py-2">5433 (avoids local pg conflicts)</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -936,9 +1244,12 @@ docker run --rm \\
 
       {/* Webhooks */}
       <section id="webhooks">
-        <h2 className="text-3xl font-bold tracking-tight text-foreground">Webhooks &amp; Notifications</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">
+          Webhooks &amp; Notifications
+        </h2>
         <p className="mt-4 text-muted-foreground">
-          Send notifications to Slack, Discord, or any HTTP endpoint when drift is detected or a migration fails.
+          Send notifications to Slack, Discord, or any HTTP endpoint when drift is detected or a
+          migration fails.
         </p>
 
         <h3 className="mt-8 text-xl font-semibold text-foreground">Via Environment Variables</h3>
@@ -967,7 +1278,9 @@ PRISMAFLOW_WEBHOOK_DISCORD_URL=https://discord.com/api/webhooks/...`}
           />
         </div>
         <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground">
-          <strong className="text-primary">Pro feature:</strong> Webhooks require a <code className="rounded bg-muted px-1.5 py-0.5 text-xs">PRISMAFLOW_LICENCE_KEY</code> to enable.
+          <strong className="text-primary">Pro feature:</strong> Webhooks require a{' '}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">PRISMAFLOW_LICENCE_KEY</code> to
+          enable.
         </div>
       </section>
 
@@ -986,22 +1299,23 @@ PRISMAFLOW_WEBHOOK_DISCORD_URL=https://discord.com/api/webhooks/...`}
             </thead>
             <tbody className="text-muted-foreground">
               {[
-                ["Visual migration timeline", true, true, true],
-                ["Drift detection",           true, true, true],
-                ["Risk analysis",             true, true, true],
-                ["CI/CD check command",       true, true, true],
-                ["doctor & init commands",    true, true, true],
-                ["Webhook notifications",     false, true, true],
-                ["Audit log (JSONL)",         false, true, true],
-                ["CI annotations",            false, true, true],
-                ["Advanced analytics",        false, false, true],
-                ["Team collaboration",        false, false, true],
+                ['Visual migration timeline', true, true, true],
+                ['Drift detection', true, true, true],
+                ['Risk analysis', true, true, true],
+                ['CI/CD check command', true, true, true],
+                ['doctor & init commands', true, true, true],
+                ['Webhook notifications', false, true, true],
+                ['Audit log (JSONL)', false, true, true],
+                ['CI annotations', false, true, true],
+                ['Advanced analytics', false, false, true],
+                ['Team collaboration', false, false, true],
               ].map(([feature, free, pro, ent], i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: static configuration array — never reorders
                 <tr key={i} className="border-b border-border/30">
                   <td className="py-2 pr-4">{feature as string}</td>
-                  <td className="py-2 pr-4 text-center">{free ? "✓" : "—"}</td>
-                  <td className="py-2 pr-4 text-center">{pro ? "✓" : "—"}</td>
-                  <td className="py-2 text-center">{ent ? "✓" : "—"}</td>
+                  <td className="py-2 pr-4 text-center">{free ? '✓' : '—'}</td>
+                  <td className="py-2 pr-4 text-center">{pro ? '✓' : '—'}</td>
+                  <td className="py-2 text-center">{ent ? '✓' : '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -1043,6 +1357,7 @@ PRISMAFLOW_WEBHOOK_DISCORD_URL=https://discord.com/api/webhooks/...`}
             a: 'Each API call spawns a short-lived npx prisma subprocess. The drift endpoint caches results for 10 seconds.',
           },
         ].map(({ q, a }, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: static FAQ array — never reorders
           <div key={i} className="mt-8">
             <h3 className="text-lg font-semibold text-foreground">{q}</h3>
             <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{a}</p>
@@ -1082,7 +1397,7 @@ PRISMAFLOW_WEBHOOK_DISCORD_URL=https://discord.com/api/webhooks/...`}
 
 /* ─── Main docs page ─── */
 export default function DocsPage() {
-  const [activeSection, setActiveSection] = useState("how-it-works")
+  const [activeSection, setActiveSection] = useState('how-it-works')
 
   return (
     <>
@@ -1092,11 +1407,15 @@ export default function DocsPage() {
           {/* Header */}
           <div className="border-b border-border/50 py-12">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
+              <Link href="/" className="hover:text-foreground transition-colors">
+                Home
+              </Link>
               <ChevronRight className="h-3.5 w-3.5" />
               <span className="text-foreground">Documentation</span>
             </div>
-            <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground">Documentation</h1>
+            <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground">
+              Documentation
+            </h1>
             <p className="mt-2 text-lg text-muted-foreground">
               Everything you need to install, configure, and use PrismaFlow.
             </p>

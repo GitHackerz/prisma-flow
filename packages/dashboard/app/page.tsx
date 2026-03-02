@@ -1,23 +1,27 @@
 'use client'
 
-import useSWR from 'swr'
-import { fetchStatus, fetchMigrations, SWR_KEYS } from '../lib/api'
-import { StatusCards }      from './components/StatusCards'
-import { MigrationTimeline } from './components/MigrationTimeline'
-import { MigrationList }    from './components/MigrationList'
-import { DriftAlert }       from './components/DriftAlert'
-import { HealthCheck }      from './components/HealthCheck'
-import { ErrorBoundary }    from 'react-error-boundary'
-import { Toaster }          from 'sonner'
 import { AlertCircle, RefreshCw } from 'lucide-react'
+import { ErrorBoundary } from 'react-error-boundary'
+import { Toaster } from 'sonner'
+import useSWR from 'swr'
+import { SWR_KEYS, fetchMigrations, fetchStatus } from '../lib/api'
+import { DriftAlert } from './components/DriftAlert'
+import { HealthCheck } from './components/HealthCheck'
+import { MigrationList } from './components/MigrationList'
+import { MigrationTimeline } from './components/MigrationTimeline'
+import { StatusCards } from './components/StatusCards'
 
-function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
+function ErrorFallback({
+  error,
+  resetErrorBoundary,
+}: { error: Error; resetErrorBoundary: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center h-screen gap-4 text-center px-4">
       <AlertCircle className="h-12 w-12 text-destructive" />
       <h2 className="text-xl font-semibold">Something went wrong</h2>
       <p className="text-sm text-muted-foreground max-w-md">{error.message}</p>
       <button
+        type="button"
         onClick={resetErrorBoundary}
         className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md border hover:bg-muted"
       >
@@ -60,15 +64,16 @@ export default function Dashboard() {
     revalidateOnFocus: true,
   })
 
-  const {
-    data: migrationsPage,
-    error: migrationsError,
-  } = useSWR(SWR_KEYS.migrations(1, 50), () => fetchMigrations(1, 50), {
-    refreshInterval: 10_000,
-  })
+  const { data: migrationsPage, error: migrationsError } = useSWR(
+    SWR_KEYS.migrations(1, 50),
+    () => fetchMigrations(1, 50),
+    {
+      refreshInterval: 10_000,
+    },
+  )
 
   if (statusLoading && !status) return <LoadingScreen />
-  if (statusError && !status)   return <ConnectionError />
+  if (statusError && !status) return <ConnectionError />
 
   const migrations = migrationsPage?.data ?? []
 
@@ -89,8 +94,15 @@ export default function Dashboard() {
         {status && <StatusCards status={status} />}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-          <MigrationTimeline migrations={migrations} isLoading={!migrationsPage && !migrationsError} />
-          <MigrationList     migrations={migrations} isLoading={!migrationsPage && !migrationsError} error={migrationsError?.message} />
+          <MigrationTimeline
+            migrations={migrations}
+            isLoading={!migrationsPage && !migrationsError}
+          />
+          <MigrationList
+            migrations={migrations}
+            isLoading={!migrationsPage && !migrationsError}
+            error={migrationsError?.message}
+          />
         </div>
       </div>
     </ErrorBoundary>

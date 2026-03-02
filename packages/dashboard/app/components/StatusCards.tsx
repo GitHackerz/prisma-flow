@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, Database, Clock } from 'lucide-react'
+import { Activity, AlertTriangle, Clock, Database } from 'lucide-react'
 import type { ProjectStatus } from '../../lib/api'
 
 export function StatusCards({ status }: { status: ProjectStatus }) {
@@ -8,7 +8,9 @@ export function StatusCards({ status }: { status: ProjectStatus }) {
       <div className="rounded-xl border bg-card text-card-foreground shadow p-6">
         <div className="flex flex-row items-center justify-between space-y-0 pb-2">
           <h3 className="tracking-tight text-sm font-medium">Database Status</h3>
-          <Database className={status.connected ? 'h-4 w-4 text-green-500' : 'h-4 w-4 text-destructive'} />
+          <Database
+            className={status.connected ? 'h-4 w-4 text-green-500' : 'h-4 w-4 text-destructive'}
+          />
         </div>
         <div className="text-2xl font-bold">{status.connected ? 'Connected' : 'Disconnected'}</div>
         <p className="text-xs text-muted-foreground">
@@ -31,7 +33,11 @@ export function StatusCards({ status }: { status: ProjectStatus }) {
         <div className="flex flex-row items-center justify-between space-y-0 pb-2">
           <h3 className="tracking-tight text-sm font-medium">Failed Migrations</h3>
           <AlertTriangle
-            className={status.migrationsFailed > 0 ? 'h-4 w-4 text-destructive' : 'h-4 w-4 text-muted-foreground'}
+            className={
+              status.migrationsFailed > 0
+                ? 'h-4 w-4 text-destructive'
+                : 'h-4 w-4 text-muted-foreground'
+            }
           />
         </div>
         <div className="text-2xl font-bold">{status.migrationsFailed}</div>
@@ -46,8 +52,11 @@ export function StatusCards({ status }: { status: ProjectStatus }) {
         </div>
         <div
           className={`text-2xl font-bold capitalize ${
-            status.riskLevel === 'high'   ? 'text-destructive' :
-            status.riskLevel === 'medium' ? 'text-yellow-500'  : 'text-green-500'
+            status.riskLevel === 'high'
+              ? 'text-destructive'
+              : status.riskLevel === 'medium'
+                ? 'text-yellow-500'
+                : 'text-green-500'
           }`}
         >
           {status.riskLevel}

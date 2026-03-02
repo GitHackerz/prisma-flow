@@ -5,14 +5,14 @@ export type MigrationStatus = 'applied' | 'pending' | 'failed'
 export type RiskLevel = 'low' | 'medium' | 'high'
 
 export interface Migration {
-  name:      string
-  timestamp: string   // ISO-8601 in API responses
-  status:    MigrationStatus
-  sqlPath:   string
+  name: string
+  timestamp: string // ISO-8601 in API responses
+  status: MigrationStatus
+  sqlPath: string
 }
 
 export interface MigrationDetail extends Migration {
-  sql:   string
+  sql: string
   risks: string[]
 }
 
@@ -27,55 +27,55 @@ export type DriftType =
   | 'unknown'
 
 export interface DriftItem {
-  sql:         string
-  type:        DriftType
+  sql: string
+  type: DriftType
   description: string
 }
 
 export interface DriftResult {
-  hasDrift:    boolean
-  driftCount:  number
+  hasDrift: boolean
+  driftCount: number
   differences: DriftItem[]
-  cachedAt:    string | null
+  cachedAt: string | null
 }
 
 // ─── Project Status ───────────────────────────────────────────────────────────
 
 export interface ProjectStatus {
-  connected:         boolean
+  connected: boolean
   migrationsApplied: number
   migrationsPending: number
-  migrationsFailed:  number
-  driftDetected:     boolean
-  driftCount:        number
-  riskLevel:         RiskLevel
-  lastSync:          string   // ISO-8601
+  migrationsFailed: number
+  driftDetected: boolean
+  driftCount: number
+  riskLevel: RiskLevel
+  lastSync: string // ISO-8601
 }
 
 // ─── API Responses ────────────────────────────────────────────────────────────
 
 export interface ApiSuccess<T> {
   success: true
-  data:    T
+  data: T
 }
 
 export interface ApiError {
   success: false
-  error:   string
+  error: string
 }
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiError
 
 export interface PaginationMeta {
-  page:  number
+  page: number
   limit: number
   total: number
   pages: number
 }
 
 export interface PaginatedResponse<T> {
-  success:    true
-  data:       T[]
+  success: true
+  data: T[]
   pagination: PaginationMeta
 }
 
@@ -87,7 +87,7 @@ export type WebhookType = 'slack' | 'discord' | 'http'
 
 export interface WebhookConfig {
   type: WebhookType
-  url:  string
+  url: string
   /** Only send for these event types (all by default) */
   events?: WebhookEvent[]
 }
@@ -95,18 +95,18 @@ export interface WebhookConfig {
 export type WebhookEvent = 'drift-detected' | 'migration-failed' | 'check-complete'
 
 export interface FeatureFlags {
-  riskAnalysis:  boolean
+  riskAnalysis: boolean
   webhookAlerts: boolean
-  auditLog:      boolean
+  auditLog: boolean
   ciAnnotations: boolean
 }
 
 export interface PrismaFlowConfig {
-  port?:        number
-  logLevel?:    LogLevel
+  port?: number
+  logLevel?: LogLevel
   openBrowser?: boolean
-  features?:    Partial<FeatureFlags>
-  webhooks?:    WebhookConfig[]
+  features?: Partial<FeatureFlags>
+  webhooks?: WebhookConfig[]
 }
 
 // ─── Audit ────────────────────────────────────────────────────────────────────
@@ -119,9 +119,9 @@ export type AuditAction =
   | 'doctor.run'
 
 export interface AuditEntry {
-  timestamp: string    // ISO-8601
-  action:    AuditAction
-  cwd:       string
-  result:    'success' | 'failure' | 'warning'
-  detail?:   Record<string, unknown>
+  timestamp: string // ISO-8601
+  action: AuditAction
+  cwd: string
+  result: 'success' | 'failure' | 'warning'
+  detail?: Record<string, unknown>
 }

@@ -1,13 +1,19 @@
-import { execFile } from 'child_process'
-import { promisify } from 'util'
-import { detectPrismaProject } from './prisma-detector.js'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 import { logger } from '../logger.js'
+import { detectPrismaProject } from './prisma-detector.js'
 
 const execFileAsync = promisify(execFile)
 
 export interface DriftItem {
   sql: string
-  type: 'table-missing' | 'table-extra' | 'column-mismatch' | 'index-change' | 'constraint-change' | 'unknown'
+  type:
+    | 'table-missing'
+    | 'table-extra'
+    | 'column-mismatch'
+    | 'index-change'
+    | 'constraint-change'
+    | 'unknown'
   description: string
 }
 
@@ -26,12 +32,12 @@ export function classifyDriftSql(sql: string): DriftItem['type'] {
 
 function labelDriftType(type: DriftItem['type']): string {
   const labels: Record<DriftItem['type'], string> = {
-    'table-missing':    'Table missing in database',
-    'table-extra':      'Table exists in database but not in schema',
-    'column-mismatch':  'Column or table structure mismatch',
-    'index-change':     'Index difference detected',
-    'constraint-change':'Constraint difference detected',
-    'unknown':          'Unknown schema change',
+    'table-missing': 'Table missing in database',
+    'table-extra': 'Table exists in database but not in schema',
+    'column-mismatch': 'Column or table structure mismatch',
+    'index-change': 'Index difference detected',
+    'constraint-change': 'Constraint difference detected',
+    unknown: 'Unknown schema change',
   }
   return labels[type]
 }
@@ -49,6 +55,7 @@ export function parseSqlStatements(sql: string): string[] {
   let i = 0
 
   while (i < sql.length) {
+    // biome-ignore lint/style/noNonNullAssertion: i < sql.length is guaranteed by the while condition above
     const ch = sql[i]!
     const next = sql[i + 1] ?? ''
 
@@ -58,11 +65,22 @@ export function parseSqlStatements(sql: string): string[] {
       continue
     }
     if (inBlockComment) {
-      if (ch === '*' && next === '/') { inBlockComment = false; i += 2 } else i++
+      if (ch === '*' && next === '/') {
+        inBlockComment = false
+        i += 2
+      } else i++
       continue
     }
-    if (!inSingleQuote && ch === '-' && next === '-') { inLineComment = true; i += 2; continue }
-    if (!inSingleQuote && ch === '/' && next === '*') { inBlockComment = true; i += 2; continue }
+    if (!inSingleQuote && ch === '-' && next === '-') {
+      inLineComment = true
+      i += 2
+      continue
+    }
+    if (!inSingleQuote && ch === '/' && next === '*') {
+      inBlockComment = true
+      i += 2
+      continue
+    }
     if (ch === "'" && !inBlockComment && !inLineComment) inSingleQuote = !inSingleQuote
 
     if (ch === ';' && !inSingleQuote) {
@@ -94,9 +112,13 @@ export async function detectDrift(cwd: string): Promise<DriftItem[]> {
     const { stdout } = await execFileAsync(
       'npx',
       [
-        'prisma', 'migrate', 'diff',
-        '--from-schema-datamodel', project.schemaPath,
-        '--to-schema-datasource',  project.schemaPath,
+        'prisma',
+        'migrate',
+        'diff',
+        '--from-schema-datamodel',
+        project.schemaPath,
+        '--to-schema-datasource',
+        project.schemaPath,
         '--script',
       ],
       { cwd, timeout: 30_000 },

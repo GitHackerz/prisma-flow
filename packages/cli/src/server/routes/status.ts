@@ -8,19 +8,19 @@ const app = new Hono<{ Variables: Variables }>()
 app.get('/', async (c) => {
   try {
     const projectPath = c.get('projectPath')
-    const status      = await getProjectStatus(projectPath)
+    const status = await getProjectStatus(projectPath)
 
     return c.json({
       success: true,
       data: {
-        connected:          status.connected,
-        migrationsApplied:  status.appliedCount,
-        migrationsPending:  status.pendingCount,
-        migrationsFailed:   status.failedCount,
-        driftDetected:      status.hasDrift,
-        driftCount:         status.driftCount,
-        riskLevel:          status.riskLevel,
-        lastSync:           status.lastSync,
+        connected: status.connected,
+        migrationsApplied: status.appliedCount,
+        migrationsPending: status.pendingCount,
+        migrationsFailed: status.failedCount,
+        driftDetected: status.hasDrift,
+        driftCount: status.driftCount,
+        riskLevel: status.riskLevel,
+        lastSync: status.lastSync,
       },
     })
   } catch (error: unknown) {

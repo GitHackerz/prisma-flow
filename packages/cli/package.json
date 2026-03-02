@@ -9,31 +9,31 @@
   },
   "engines": { "node": ">=20" },
   "scripts": {
-    "build":      "node scripts/copy-dashboard.mjs && tsup src/index.ts --format esm --dts",
-    "dev":        "tsup src/index.ts --format esm --watch",
-    "typecheck":  "tsc --noEmit",
-    "lint":       "eslint src",
-    "test":       "vitest run",
+    "build": "node scripts/copy-dashboard.mjs && tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src",
+    "test": "vitest run",
     "test:watch": "vitest",
-    "clean":      "rm -rf dist public"
+    "clean": "rm -rf dist public"
   },
   "dependencies": {
-    "hono":              "^4.6.0",
+    "hono": "^4.6.0",
     "@hono/node-server": "^1.13.0",
-    "commander":         "^12.0.0",
+    "commander": "^12.0.0",
     "@prisma/internals": "^5.22.0",
-    "chalk":             "^5.3.0",
-    "open":              "^10.0.0",
-    "dotenv":            "^16.4.0",
-    "zod":               "^3.22.0",
-    "pino":              "^9.0.0",
-    "pino-pretty":       "^11.0.0",
+    "chalk": "^5.3.0",
+    "open": "^10.0.0",
+    "dotenv": "^16.4.0",
+    "zod": "^3.22.0",
+    "pino": "^9.0.0",
+    "pino-pretty": "^11.0.0",
     "@prisma-flow/shared": "*"
   },
   "devDependencies": {
-    "typescript":    "^5.6.0",
-    "tsup":          "^8.0.0",
-    "@types/node":   "^22.0.0",
-    "vitest":        "^2.0.0"
+    "typescript": "^5.6.0",
+    "tsup": "^8.0.0",
+    "@types/node": "^22.0.0",
+    "vitest": "^2.0.0"
   }
 }

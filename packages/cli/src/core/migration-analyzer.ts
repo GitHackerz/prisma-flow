@@ -1,29 +1,27 @@
-import { execFile } from 'child_process'
-import { promisify } from 'util'
-import { detectPrismaProject, type Migration, type ProjectStatus } from './prisma-detector.js'
-import { detectDrift } from './drift-detector.js'
+import { execFile } from 'node:child_process'
+import fs from 'node:fs/promises'
+import { promisify } from 'node:util'
 import { logger } from '../logger.js'
-import fs from 'fs/promises'
+import { detectDrift } from './drift-detector.js'
+import { type Migration, type ProjectStatus, detectPrismaProject } from './prisma-detector.js'
 
 const execFileAsync = promisify(execFile)
 
 // ─── Risk keywords ────────────────────────────────────────────────────────────
 
 const RISK_PATTERNS: Array<{ pattern: string; label: string }> = [
-  { pattern: 'DROP TABLE',    label: 'Drops table — irreversible data loss' },
-  { pattern: 'DROP COLUMN',   label: 'Drops column — potential data loss' },
-  { pattern: 'DELETE FROM',   label: 'Bulk data deletion' },
-  { pattern: 'TRUNCATE',      label: 'Truncates table — full data loss' },
-  { pattern: 'ALTER TABLE',   label: 'Alters table structure' },
-  { pattern: 'DROP INDEX',    label: 'Removes index — may impact performance' },
+  { pattern: 'DROP TABLE', label: 'Drops table — irreversible data loss' },
+  { pattern: 'DROP COLUMN', label: 'Drops column — potential data loss' },
+  { pattern: 'DELETE FROM', label: 'Bulk data deletion' },
+  { pattern: 'TRUNCATE', label: 'Truncates table — full data loss' },
+  { pattern: 'ALTER TABLE', label: 'Alters table structure' },
+  { pattern: 'DROP INDEX', label: 'Removes index — may impact performance' },
   { pattern: 'DROP CONSTRAINT', label: 'Removes constraint — may allow invalid data' },
 ]
 
 export function analyzeMigrationRisks(sql: string): string[] {
   const upper = sql.toUpperCase()
-  return RISK_PATTERNS
-    .filter(({ pattern }) => upper.includes(pattern))
-    .map(({ label }) => label)
+  return RISK_PATTERNS.filter(({ pattern }) => upper.includes(pattern)).map(({ label }) => label)
 }
 
 // ─── Migration status parsing ─────────────────────────────────────────────────
@@ -77,10 +75,19 @@ async function getMigrationStatusMap(
     const line = rawLine.trim()
 
     // Section headers
-    if (line.includes('have not yet been applied')) { mode = 'pending'; continue }
-    if (line.match(/failed to apply|rolled back|migration.*failed/i)) { mode = 'failed'; continue }
+    if (line.includes('have not yet been applied')) {
+      mode = 'pending'
+      continue
+    }
+    if (line.match(/failed to apply|rolled back|migration.*failed/i)) {
+      mode = 'failed'
+      continue
+    }
     // End of a section
-    if (line === '' || line.startsWith('─') || line.startsWith('The following')) { mode = 'none'; continue }
+    if (line === '' || line.startsWith('─') || line.startsWith('The following')) {
+      mode = 'none'
+      continue
+    }
 
     if (mode === 'none') continue
 
@@ -131,7 +138,11 @@ export async function getMigrations(cwd: string): Promise<(Migration & { risks: 
     project.migrations.map(async (m) => {
       const status = statusMap.get(m.name) ?? 'applied'
       let sql = ''
-      try { sql = await fs.readFile(m.sqlPath, 'utf-8') } catch { /* ignore */ }
+      try {
+        sql = await fs.readFile(m.sqlPath, 'utf-8')
+      } catch {
+        /* ignore */
+      }
       const risks = analyzeMigrationRisks(sql)
       return { ...m, status, risks }
     }),
@@ -145,11 +156,10 @@ export async function getProjectStatus(cwd: string): Promise<ProjectStatus> {
   // ── Connection check ──────────────────────────────────────────────────────
   let connected = false
   try {
-    await execFileAsync(
-      'npx',
-      ['prisma', 'migrate', 'status', '--schema', project.schemaPath],
-      { cwd, timeout: 30_000 },
-    )
+    await execFileAsync('npx', ['prisma', 'migrate', 'status', '--schema', project.schemaPath], {
+      cwd,
+      timeout: 30_000,
+    })
     connected = true
   } catch (err: unknown) {
     const error = err as { stderr?: string; stdout?: string; message?: string }
@@ -168,7 +178,7 @@ export async function getProjectStatus(cwd: string): Promise<ProjectStatus> {
 
   const migrations = await getMigrations(cwd)
   const pendingCount = migrations.filter((m) => m.status === 'pending').length
-  const failedCount  = migrations.filter((m) => m.status === 'failed').length
+  const failedCount = migrations.filter((m) => m.status === 'failed').length
   const appliedCount = migrations.filter((m) => m.status === 'applied').length
 
   // ── Drift detection ───────────────────────────────────────────────────────
@@ -180,7 +190,7 @@ export async function getProjectStatus(cwd: string): Promise<ProjectStatus> {
   if (connected) {
     try {
       driftItems = await detectDrift(cwd)
-      hasDrift   = driftItems.length > 0
+      hasDrift = driftItems.length > 0
     } catch {
       // drift check errors are non-fatal
     }
@@ -188,9 +198,9 @@ export async function getProjectStatus(cwd: string): Promise<ProjectStatus> {
 
   // ── Risk level ────────────────────────────────────────────────────────────
   let riskLevel: ProjectStatus['riskLevel'] = 'low'
-  if (failedCount > 0)  riskLevel = 'high'
-  else if (hasDrift)    riskLevel = 'medium'
-  else if (pendingCount > 0) riskLevel = 'low'  // pending is expected, not risky by default
+  if (failedCount > 0) riskLevel = 'high'
+  else if (hasDrift) riskLevel = 'medium'
+  else if (pendingCount > 0) riskLevel = 'low' // pending is expected, not risky by default
 
   return {
     connected,

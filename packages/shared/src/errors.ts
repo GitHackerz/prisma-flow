@@ -22,7 +22,7 @@ export class SchemaNotFoundError extends PrismaFlowError {
 export class DatabaseConnectionError extends PrismaFlowError {
   constructor(detail?: string) {
     super(
-      `Could not reach the database server.${detail ? ' ' + detail : ''} Check DATABASE_URL in .env.`,
+      `Could not reach the database server.${detail ? ` ${detail}` : ''} Check DATABASE_URL in .env.`,
       'DATABASE_UNREACHABLE',
     )
     this.name = 'DatabaseConnectionError'

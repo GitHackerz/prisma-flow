@@ -3,8 +3,8 @@ import type { Migration } from '../../lib/api'
 
 interface Props {
   migrations: Migration[]
-  isLoading:  boolean
-  error?:     string
+  isLoading: boolean
+  error?: string
 }
 
 export function MigrationList({ migrations, isLoading, error }: Props) {
@@ -16,12 +16,16 @@ export function MigrationList({ migrations, isLoading, error }: Props) {
       </div>
       <div className="p-6 pt-0">
         {error && (
-          <p className="text-sm text-destructive py-4 text-center">⚠️ Error loading migrations: {error}</p>
+          <p className="text-sm text-destructive py-4 text-center">
+            ⚠️ Error loading migrations: {error}
+          </p>
         )}
 
         {isLoading && !error && (
           <div className="space-y-2">
-            {[1, 2, 3].map((i) => <div key={i} className="h-10 rounded bg-muted animate-pulse" />)}
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-10 rounded bg-muted animate-pulse" />
+            ))}
           </div>
         )}
 
@@ -30,9 +34,15 @@ export function MigrationList({ migrations, isLoading, error }: Props) {
             <table className="w-full caption-bottom text-sm">
               <thead className="[&_tr]:border-b sticky top-0 bg-card z-10">
                 <tr className="border-b">
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Name
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Status
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Date
+                  </th>
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">
@@ -47,9 +57,11 @@ export function MigrationList({ migrations, isLoading, error }: Props) {
                     <td className="p-4 align-middle">
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                          migration.status === 'applied' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                          migration.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                          'bg-destructive/10 text-destructive'
+                          migration.status === 'applied'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            : migration.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                              : 'bg-destructive/10 text-destructive'
                         }`}
                       >
                         {migration.status}

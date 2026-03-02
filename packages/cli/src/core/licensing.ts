@@ -17,45 +17,45 @@ import { logger } from '../logger.js'
 export type Tier = 'free' | 'pro' | 'enterprise'
 
 export interface FeatureMatrix {
-  riskAnalysis:   boolean
-  webhookAlerts:  boolean
-  auditLog:       boolean
-  ciAnnotations:  boolean
-  multiProject:   boolean
-  rbac:           boolean
-  ssoHooks:       boolean
-  prioritySupport:boolean
+  riskAnalysis: boolean
+  webhookAlerts: boolean
+  auditLog: boolean
+  ciAnnotations: boolean
+  multiProject: boolean
+  rbac: boolean
+  ssoHooks: boolean
+  prioritySupport: boolean
 }
 
 const TIER_FEATURES: Record<Tier, FeatureMatrix> = {
   free: {
-    riskAnalysis:    false,
-    webhookAlerts:   false,
-    auditLog:        false,
-    ciAnnotations:   false,
-    multiProject:    false,
-    rbac:            false,
-    ssoHooks:        false,
+    riskAnalysis: false,
+    webhookAlerts: false,
+    auditLog: false,
+    ciAnnotations: false,
+    multiProject: false,
+    rbac: false,
+    ssoHooks: false,
     prioritySupport: false,
   },
   pro: {
-    riskAnalysis:    true,
-    webhookAlerts:   true,
-    auditLog:        true,
-    ciAnnotations:   true,
-    multiProject:    false,
-    rbac:            false,
-    ssoHooks:        false,
+    riskAnalysis: true,
+    webhookAlerts: true,
+    auditLog: true,
+    ciAnnotations: true,
+    multiProject: false,
+    rbac: false,
+    ssoHooks: false,
     prioritySupport: false,
   },
   enterprise: {
-    riskAnalysis:    true,
-    webhookAlerts:   true,
-    auditLog:        true,
-    ciAnnotations:   true,
-    multiProject:    true,
-    rbac:            true,
-    ssoHooks:        true,
+    riskAnalysis: true,
+    webhookAlerts: true,
+    auditLog: true,
+    ciAnnotations: true,
+    multiProject: true,
+    rbac: true,
+    ssoHooks: true,
     prioritySupport: true,
   },
 }
@@ -65,7 +65,7 @@ let _resolvedTier: Tier | null = null
 export function resolveTier(): Tier {
   if (_resolvedTier) return _resolvedTier
 
-  const key = process.env['PRISMAFLOW_LICENCE_KEY'] ?? ''
+  const key = process.env.PRISMAFLOW_LICENCE_KEY ?? ''
 
   if (!key) {
     _resolvedTier = 'free'
@@ -98,8 +98,7 @@ export function requireFeature(feature: keyof FeatureMatrix): void {
   if (!isFeatureEnabled(feature)) {
     const tier = resolveTier()
     throw new Error(
-      `Feature "${feature}" is not available on the ${tier} plan. ` +
-        'Upgrade at https://prismaflow.dev/pricing',
+      `Feature "${feature}" is not available on the ${tier} plan. Upgrade at https://prismaflow.dev/pricing`,
     )
   }
 }

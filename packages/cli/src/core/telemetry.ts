@@ -20,47 +20,44 @@ import { logger } from '../logger.js'
 const TELEMETRY_ENDPOINT = 'https://telemetry.prismaflow.dev/v1/event'
 
 function isEnabled(): boolean {
-  const val = process.env['PRISMAFLOW_TELEMETRY']
-  if (!val) return true        // opt-in by default
+  const val = process.env.PRISMAFLOW_TELEMETRY
+  if (!val) return true // opt-in by default
   return val.toLowerCase() !== 'off' && val.toLowerCase() !== 'false' && val !== '0'
 }
 
 function bucketCount(n: number): string {
-  if (n === 0)   return '0'
-  if (n <= 10)   return '1-10'
-  if (n <= 50)   return '11-50'
+  if (n === 0) return '0'
+  if (n <= 10) return '1-10'
+  if (n <= 50) return '11-50'
   return '50+'
 }
 
 export interface TelemetryPayload {
-  event:             string
+  event: string
   migrationCountBucket: string
-  nodeVersion:       string
-  platform:          string
+  nodeVersion: string
+  platform: string
 }
 
 /**
  * Fire-and-forget telemetry event.  Never throws — always swallows errors.
  */
-export async function trackEvent(
-  event:          string,
-  migrationCount: number,
-): Promise<void> {
+export async function trackEvent(event: string, migrationCount: number): Promise<void> {
   if (!isEnabled()) return
 
   const payload: TelemetryPayload = {
     event,
     migrationCountBucket: bucketCount(migrationCount),
-    nodeVersion:          process.versions.node.split('.')[0] ?? 'unknown',
-    platform:             process.platform,
+    nodeVersion: process.versions.node.split('.')[0] ?? 'unknown',
+    platform: process.platform,
   }
 
   try {
     await fetch(TELEMETRY_ENDPOINT, {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(payload),
-      signal:  AbortSignal.timeout(3_000),   // never block more than 3 s
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(3_000), // never block more than 3 s
     })
   } catch {
     // Telemetry failures are always silent

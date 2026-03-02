@@ -1,24 +1,36 @@
-import Link from "next/link"
-import { Database, Github, Heart } from "lucide-react"
+import { Database, Github, Heart } from 'lucide-react'
+import Link from 'next/link'
 
 const footerLinks = {
   Product: [
-    { label: "Features",     href: "/#features" },
-    { label: "Installation", href: "/#installation" },
-    { label: "CLI Reference", href: "/#cli" },
-    { label: "Pricing",      href: "/#pricing" },
+    { label: 'Features', href: '/#features' },
+    { label: 'Installation', href: '/#installation' },
+    { label: 'CLI Reference', href: '/#cli' },
+    { label: 'Pricing', href: '/#pricing' },
   ],
   Resources: [
-    { label: "Documentation", href: "/docs" },
-    { label: "API Reference", href: "/docs#api-reference" },
-    { label: "CI/CD Guide",   href: "/docs#cicd-integration" },
-    { label: "Docker",        href: "/docs#docker" },
+    { label: 'Documentation', href: '/docs' },
+    { label: 'API Reference', href: '/docs#api-reference' },
+    { label: 'CI/CD Guide', href: '/docs#cicd-integration' },
+    { label: 'Docker', href: '/docs#docker' },
   ],
   Community: [
-    { label: "GitHub",        href: "https://github.com/GitHackerz/prisma-flow", external: true },
-    { label: "Contributing",  href: "https://github.com/GitHackerz/prisma-flow/blob/main/CONTRIBUTING.md", external: true },
-    { label: "Changelog",     href: "https://github.com/GitHackerz/prisma-flow/blob/main/CHANGELOG.md", external: true },
-    { label: "License (MIT)", href: "https://github.com/GitHackerz/prisma-flow/blob/main/LICENSE", external: true },
+    { label: 'GitHub', href: 'https://github.com/GitHackerz/prisma-flow', external: true },
+    {
+      label: 'Contributing',
+      href: 'https://github.com/GitHackerz/prisma-flow/blob/main/CONTRIBUTING.md',
+      external: true,
+    },
+    {
+      label: 'Changelog',
+      href: 'https://github.com/GitHackerz/prisma-flow/blob/main/CHANGELOG.md',
+      external: true,
+    },
+    {
+      label: 'License (MIT)',
+      href: 'https://github.com/GitHackerz/prisma-flow/blob/main/LICENSE',
+      external: true,
+    },
   ],
 }
 
@@ -38,7 +50,8 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground leading-relaxed">
-              Visual Prisma migration management. Detect drift, analyse risks, and ship database changes safely.
+              Visual Prisma migration management. Detect drift, analyse risks, and ship database
+              changes safely.
             </p>
             <div className="mt-4 flex items-center gap-3">
               <a
@@ -59,7 +72,7 @@ export function Footer() {
               <ul className="mt-4 space-y-3">
                 {links.map((link) => (
                   <li key={link.label}>
-                    {"external" in link ? (
+                    {'external' in link ? (
                       <a
                         href={link.href}
                         target="_blank"

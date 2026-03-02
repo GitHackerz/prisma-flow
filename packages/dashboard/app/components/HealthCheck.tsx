@@ -1,7 +1,7 @@
 'use client'
 
-import { Badge } from './ui/badge'
 import type { ProjectStatus } from '../../lib/api'
+import { Badge } from './ui/badge'
 
 export function HealthCheck({ status }: { status: ProjectStatus | null }) {
   if (!status) return <Badge variant="outline">Connecting…</Badge>
@@ -10,26 +10,28 @@ export function HealthCheck({ status }: { status: ProjectStatus | null }) {
   let message = 'System Operational'
 
   if (status.migrationsFailed > 0) {
-    health  = 'error'
+    health = 'error'
     message = 'Migration Failures'
   } else if (status.driftDetected) {
-    health  = 'warning'
+    health = 'warning'
     message = `Schema Drift (${status.driftCount})`
   } else if (!status.connected) {
-    health  = 'error'
+    health = 'error'
     message = 'DB Disconnected'
   }
 
   const variants: Record<typeof health, string> = {
-    healthy: 'bg-green-100 text-green-800 hover:bg-green-100 border-green-200 dark:bg-green-900/30 dark:text-green-400',
-    warning: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400',
-    error:   'bg-destructive/10 text-destructive hover:bg-destructive/10 border-destructive/20',
+    healthy:
+      'bg-green-100 text-green-800 hover:bg-green-100 border-green-200 dark:bg-green-900/30 dark:text-green-400',
+    warning:
+      'bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400',
+    error: 'bg-destructive/10 text-destructive hover:bg-destructive/10 border-destructive/20',
   }
 
   const icons: Record<typeof health, string> = {
     healthy: '✅',
     warning: '⚠️',
-    error:   '❌',
+    error: '❌',
   }
 
   return (

@@ -39,10 +39,9 @@ jobs:
 
       - name: Lint
         run: npx turbo lint
-        continue-on-error: true  # lint warnings should not block CI
 
-      - name: Format check
-        run: npm run format:check
+      - name: Format / quality check
+        run: npx biome check .
 
   # ─── Tests ────────────────────────────────────────────────────────────────
   test:

@@ -1,8 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import {
-  parseSqlStatements,
-  classifyDriftSql,
-} from '../core/drift-detector.js'
+import { describe, expect, it } from 'vitest'
+import { classifyDriftSql, parseSqlStatements } from '../core/drift-detector.js'
 
 // ─── parseSqlStatements ───────────────────────────────────────────────────────
 
@@ -87,7 +84,11 @@ describe('classifyDriftSql()', () => {
   })
 
   it('classifies a statement containing CONSTRAINT as constraint-change', () => {
-    expect(classifyDriftSql('ALTER TABLE "T" ADD CONSTRAINT "fk" FOREIGN KEY ("x") REFERENCES "Y"("id")')).toBe('constraint-change')
+    expect(
+      classifyDriftSql(
+        'ALTER TABLE "T" ADD CONSTRAINT "fk" FOREIGN KEY ("x") REFERENCES "Y"("id")',
+      ),
+    ).toBe('constraint-change')
   })
 
   it('classifies unknown statements as unknown', () => {

@@ -1,32 +1,28 @@
-import Link from "next/link"
 import {
-  ArrowRight,
-  Shield,
   Activity,
-  GitBranch,
-  Terminal,
-  Globe,
-  Zap,
-  Eye,
   AlertTriangle,
+  ArrowRight,
   BarChart3,
-  Webhook,
-  Lock,
   Check,
   ChevronRight,
-  Clock,
   Download,
+  Eye,
+  FileCode,
+  GitBranch,
   Layers,
-  Database,
   Search,
   Server,
-  FileCode,
-} from "lucide-react"
-import { Navbar } from "./components/Navbar"
-import { Footer } from "./components/Footer"
-import { CodeBlock } from "./components/CodeBlock"
-import { FeatureCard } from "./components/FeatureCard"
-import { Section, SectionHeader } from "./components/Section"
+  Shield,
+  Terminal,
+  Webhook,
+  Zap,
+} from 'lucide-react'
+import Link from 'next/link'
+import { CodeBlock } from './components/CodeBlock'
+import { FeatureCard } from './components/FeatureCard'
+import { Footer } from './components/Footer'
+import { Navbar } from './components/Navbar'
+import { Section, SectionHeader } from './components/Section'
 
 /* ─────────────────────────────────────────────────── Hero ── */
 function Hero() {
@@ -55,9 +51,8 @@ function Hero() {
         </h1>
 
         <p className="animate-fade-in-up-delay-2 mx-auto mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed sm:text-xl">
-          Detect schema drift, analyse migration risks, and ship database
-          changes safely — <strong className="text-foreground">CLI + web dashboard</strong> for
-          every Prisma project.
+          Detect schema drift, analyse migration risks, and ship database changes safely —{' '}
+          <strong className="text-foreground">CLI + web dashboard</strong> for every Prisma project.
         </p>
 
         {/* CTAs */}
@@ -98,7 +93,9 @@ function Hero() {
                 <span className="text-emerald-400">✓</span>
                 <span className="text-white/80"> Prisma project detected</span>
               </div>
-              <div className="text-white/40 pl-4">Schema: &nbsp;&nbsp;&nbsp;prisma/schema.prisma</div>
+              <div className="text-white/40 pl-4">
+                Schema: &nbsp;&nbsp;&nbsp;prisma/schema.prisma
+              </div>
               <div className="text-white/40 pl-4">Migrations: 12 found</div>
               <div className="mt-3">
                 <span className="text-emerald-400">✓</span>
@@ -108,9 +105,7 @@ function Hero() {
                 <span className="text-emerald-400">✓</span>
                 <span className="text-white/80"> PrismaFlow dashboard running</span>
               </div>
-              <div className="mt-1.5 text-violet-400">
-                → http://localhost:5555?token=a3f8c2...
-              </div>
+              <div className="mt-1.5 text-violet-400">→ http://localhost:5555?token=a3f8c2...</div>
               <div className="mt-3 text-white/40">Auth token printed above — keep it private.</div>
               <div className="text-white/40">Press Ctrl+C to stop</div>
               <div className="mt-2 inline-block h-4 w-2 animate-pulse-slow bg-white/60" />
@@ -127,66 +122,66 @@ function FeaturesGrid() {
   const features = [
     {
       icon: Eye,
-      title: "Schema Drift Detection",
+      title: 'Schema Drift Detection',
       description:
-        "Continuously compare your Prisma schema to the live database. Detect manual ALTER TABLE changes, orphaned indexes, and constraint mismatches in real time.",
-      iconColor: "text-primary" as const,
+        'Continuously compare your Prisma schema to the live database. Detect manual ALTER TABLE changes, orphaned indexes, and constraint mismatches in real time.',
+      iconColor: 'text-primary' as const,
     },
     {
       icon: AlertTriangle,
-      title: "Risk Analysis",
+      title: 'Risk Analysis',
       description:
-        "Every migration is scanned for destructive operations — DROP TABLE, DROP COLUMN, TRUNCATE, bulk DELETE. Color-coded risk badges protect you from dangerous deploys.",
-      iconColor: "text-amber-400" as const,
+        'Every migration is scanned for destructive operations — DROP TABLE, DROP COLUMN, TRUNCATE, bulk DELETE. Color-coded risk badges protect you from dangerous deploys.',
+      iconColor: 'text-amber-400' as const,
     },
     {
       icon: Activity,
-      title: "Live Dashboard",
+      title: 'Live Dashboard',
       description:
-        "A browser-based UI that auto-updates every few seconds. See connection status, pending/applied/failed migrations, and drift alerts at a glance.",
-      iconColor: "text-emerald-400" as const,
+        'A browser-based UI that auto-updates every few seconds. See connection status, pending/applied/failed migrations, and drift alerts at a glance.',
+      iconColor: 'text-emerald-400' as const,
     },
     {
       icon: Terminal,
-      title: "Powerful CLI",
+      title: 'Powerful CLI',
       description:
-        "Five sub-commands — dashboard, status, check, init, doctor — give you full control from the terminal. JSON output for scripting, structured exit codes for CI.",
-      iconColor: "text-sky-400" as const,
+        'Five sub-commands — dashboard, status, check, init, doctor — give you full control from the terminal. JSON output for scripting, structured exit codes for CI.',
+      iconColor: 'text-sky-400' as const,
     },
     {
       icon: GitBranch,
-      title: "CI/CD Ready",
+      title: 'CI/CD Ready',
       description:
-        "Run prisma-flow check --ci in GitHub Actions, GitLab CI, or Jenkins. Structured exit codes (0–4) and JSON output integrate with any pipeline.",
-      iconColor: "text-primary" as const,
+        'Run prisma-flow check --ci in GitHub Actions, GitLab CI, or Jenkins. Structured exit codes (0–4) and JSON output integrate with any pipeline.',
+      iconColor: 'text-primary' as const,
     },
     {
       icon: Shield,
-      title: "Secure by Default",
+      title: 'Secure by Default',
       description:
-        "Per-session 192-bit auth tokens, local-only CORS policy, execFile() for child processes (no shell injection), and no external network calls.",
-      iconColor: "text-emerald-400" as const,
+        'Per-session 192-bit auth tokens, local-only CORS policy, execFile() for child processes (no shell injection), and no external network calls.',
+      iconColor: 'text-emerald-400' as const,
     },
     {
       icon: Webhook,
-      title: "Webhook Notifications",
+      title: 'Webhook Notifications',
       description:
-        "Get Slack, Discord, or generic HTTP notifications when drift is detected or a migration fails. Configure per-event or for all events.",
-      iconColor: "text-amber-400" as const,
+        'Get Slack, Discord, or generic HTTP notifications when drift is detected or a migration fails. Configure per-event or for all events.',
+      iconColor: 'text-amber-400' as const,
     },
     {
       icon: BarChart3,
-      title: "Migration Timeline",
+      title: 'Migration Timeline',
       description:
-        "A horizontal visual timeline showing the chronological history of all migrations — applied, pending, and failed — with hover-to-inspect details.",
-      iconColor: "text-sky-400" as const,
+        'A horizontal visual timeline showing the chronological history of all migrations — applied, pending, and failed — with hover-to-inspect details.',
+      iconColor: 'text-sky-400' as const,
     },
     {
       icon: Server,
-      title: "Docker Ready",
+      title: 'Docker Ready',
       description:
-        "Multi-stage Dockerfile and docker-compose.yml included. Mount your project, set DATABASE_URL, and run locally or in any containerized environment.",
-      iconColor: "text-primary" as const,
+        'Multi-stage Dockerfile and docker-compose.yml included. Mount your project, set DATABASE_URL, and run locally or in any containerized environment.',
+      iconColor: 'text-primary' as const,
     },
   ]
 
@@ -210,28 +205,32 @@ function FeaturesGrid() {
 function HowItWorks() {
   const steps = [
     {
-      number: "01",
+      number: '01',
       icon: Search,
-      title: "Detect",
-      description: "PrismaFlow scans your project — finds the schema, discovers migrations, checks DATABASE_URL. Zero configuration needed.",
+      title: 'Detect',
+      description:
+        'PrismaFlow scans your project — finds the schema, discovers migrations, checks DATABASE_URL. Zero configuration needed.',
     },
     {
-      number: "02",
+      number: '02',
       icon: Activity,
-      title: "Analyse",
-      description: "Runs prisma migrate status and prisma migrate diff under the hood. Parses SQL output to classify every difference and assign risk levels.",
+      title: 'Analyse',
+      description:
+        'Runs prisma migrate status and prisma migrate diff under the hood. Parses SQL output to classify every difference and assign risk levels.',
     },
     {
-      number: "03",
+      number: '03',
       icon: Layers,
-      title: "Visualise",
-      description: "Results are served via a local Hono API server and displayed in a Next.js dashboard with auto-refreshing status cards, timelines, and alerts.",
+      title: 'Visualise',
+      description:
+        'Results are served via a local Hono API server and displayed in a Next.js dashboard with auto-refreshing status cards, timelines, and alerts.',
     },
     {
-      number: "04",
+      number: '04',
       icon: Shield,
-      title: "Protect",
-      description: "Integrate with CI/CD using the check command. Block deploys when drift or failed migrations are detected. Alert your team via webhooks.",
+      title: 'Protect',
+      description:
+        'Integrate with CI/CD using the check command. Block deploys when drift or failed migrations are detected. Alert your team via webhooks.',
     },
   ]
 
@@ -328,7 +327,7 @@ function Installation() {
             Install once, use from any Prisma project on your machine.
           </p>
           <div className="mt-4">
-            <CodeBlock code={`npm install -g prisma-flow\nprisma-flow`} filename="terminal" />
+            <CodeBlock code={'npm install -g prisma-flow\nprisma-flow'} filename="terminal" />
           </div>
         </div>
 
@@ -350,8 +349,8 @@ function Installation() {
       {/* Requirements */}
       <div className="mx-auto mt-12 max-w-xl text-center">
         <p className="text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">Requirements:</span>{" "}
-          Node.js 20+, Prisma 5+, DATABASE_URL set in .env
+          <span className="font-medium text-foreground">Requirements:</span> Node.js 20+, Prisma 5+,
+          DATABASE_URL set in .env
         </p>
       </div>
     </Section>
@@ -362,33 +361,33 @@ function Installation() {
 function CLISection() {
   const commands = [
     {
-      name: "prisma-flow",
-      aka: "dashboard",
-      description: "Launch the visual dashboard in your browser",
-      flags: ["-p, --port <port>", "--no-open"],
+      name: 'prisma-flow',
+      aka: 'dashboard',
+      description: 'Launch the visual dashboard in your browser',
+      flags: ['-p, --port <port>', '--no-open'],
     },
     {
-      name: "prisma-flow status",
+      name: 'prisma-flow status',
       aka: null,
-      description: "Print migration & drift state to the terminal",
-      flags: ["--json"],
+      description: 'Print migration & drift state to the terminal',
+      flags: ['--json'],
     },
     {
-      name: "prisma-flow check",
+      name: 'prisma-flow check',
       aka: null,
-      description: "Validate state for CI/CD — structured exit codes (0-4)",
-      flags: ["--ci", "--json"],
+      description: 'Validate state for CI/CD — structured exit codes (0-4)',
+      flags: ['--ci', '--json'],
     },
     {
-      name: "prisma-flow init",
+      name: 'prisma-flow init',
       aka: null,
-      description: "Create prismaflow.config.ts with documented defaults",
-      flags: ["-f, --force"],
+      description: 'Create prismaflow.config.ts with documented defaults',
+      flags: ['-f, --force'],
     },
     {
-      name: "prisma-flow doctor",
+      name: 'prisma-flow doctor',
       aka: null,
-      description: "Run environment checks (Node, Prisma, DB, schema, migrations)",
+      description: 'Run environment checks (Node, Prisma, DB, schema, migrations)',
       flags: [],
     },
   ]
@@ -412,9 +411,7 @@ function CLISection() {
                 <code className="rounded-md bg-primary/10 px-2.5 py-1 font-mono text-sm text-primary">
                   {cmd.name}
                 </code>
-                {cmd.aka && (
-                  <span className="text-xs text-muted-foreground">(default)</span>
-                )}
+                {cmd.aka && <span className="text-xs text-muted-foreground">(default)</span>}
               </div>
               <p className="mt-1.5 text-sm text-muted-foreground">{cmd.description}</p>
             </div>
@@ -479,15 +476,25 @@ function APIPreview() {
 
       <div className="mx-auto mt-16 grid max-w-5xl gap-6 lg:grid-cols-2">
         <div>
-          <h3 className="mb-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Endpoints</h3>
+          <h3 className="mb-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            Endpoints
+          </h3>
           <div className="space-y-3">
             {[
-              { method: "GET",  path: "/api/status",            desc: "Project & database health" },
-              { method: "GET",  path: "/api/migrations",        desc: "Paginated migration list with risks" },
-              { method: "GET",  path: "/api/migrations/:name",  desc: "Single migration SQL + analysis" },
-              { method: "GET",  path: "/api/drift",             desc: "Current drift state (cached 10s)" },
-              { method: "POST", path: "/api/drift/check",       desc: "Force-refresh drift analysis" },
-              { method: "GET",  path: "/api/schema",            desc: "Parsed models & enums" },
+              { method: 'GET', path: '/api/status', desc: 'Project & database health' },
+              {
+                method: 'GET',
+                path: '/api/migrations',
+                desc: 'Paginated migration list with risks',
+              },
+              {
+                method: 'GET',
+                path: '/api/migrations/:name',
+                desc: 'Single migration SQL + analysis',
+              },
+              { method: 'GET', path: '/api/drift', desc: 'Current drift state (cached 10s)' },
+              { method: 'POST', path: '/api/drift/check', desc: 'Force-refresh drift analysis' },
+              { method: 'GET', path: '/api/schema', desc: 'Parsed models & enums' },
             ].map((ep) => (
               <div
                 key={ep.path}
@@ -495,9 +502,9 @@ function APIPreview() {
               >
                 <span
                   className={`rounded-md px-2 py-0.5 font-mono text-xs font-semibold ${
-                    ep.method === "GET"
-                      ? "bg-emerald-500/10 text-emerald-400"
-                      : "bg-amber-500/10 text-amber-400"
+                    ep.method === 'GET'
+                      ? 'bg-emerald-500/10 text-emerald-400'
+                      : 'bg-amber-500/10 text-amber-400'
                   }`}
                 >
                   {ep.method}
@@ -546,56 +553,56 @@ function APIPreview() {
 function Pricing() {
   const tiers = [
     {
-      name: "Free",
-      price: "$0",
-      period: "forever",
-      description: "Everything you need for solo projects and small teams.",
+      name: 'Free',
+      price: '$0',
+      period: 'forever',
+      description: 'Everything you need for solo projects and small teams.',
       features: [
-        "Visual migration timeline",
-        "Real-time drift detection",
-        "Risk analysis for every migration",
-        "CI/CD check command",
-        "doctor & init commands",
-        "Local REST API",
-        "Docker support",
+        'Visual migration timeline',
+        'Real-time drift detection',
+        'Risk analysis for every migration',
+        'CI/CD check command',
+        'doctor & init commands',
+        'Local REST API',
+        'Docker support',
       ],
-      cta: "Get Started",
-      ctaHref: "#installation",
+      cta: 'Get Started',
+      ctaHref: '#installation',
       highlighted: false,
     },
     {
-      name: "Pro",
-      price: "$19",
-      period: "/month",
-      description: "Advanced features for teams shipping to production daily.",
+      name: 'Pro',
+      price: '$19',
+      period: '/month',
+      description: 'Advanced features for teams shipping to production daily.',
       features: [
-        "Everything in Free",
-        "Webhook notifications (Slack, Discord, HTTP)",
-        "JSONL audit log",
-        "CI annotations",
-        "Priority support",
-        "Extended analytics",
+        'Everything in Free',
+        'Webhook notifications (Slack, Discord, HTTP)',
+        'JSONL audit log',
+        'CI annotations',
+        'Priority support',
+        'Extended analytics',
       ],
-      cta: "Coming Soon",
-      ctaHref: "#",
+      cta: 'Coming Soon',
+      ctaHref: '#',
       highlighted: true,
     },
     {
-      name: "Enterprise",
-      price: "Custom",
-      period: "",
-      description: "For organizations with strict compliance and scale requirements.",
+      name: 'Enterprise',
+      price: 'Custom',
+      period: '',
+      description: 'For organizations with strict compliance and scale requirements.',
       features: [
-        "Everything in Pro",
-        "Team collaboration",
-        "Advanced analytics dashboard",
-        "SSO / SAML support",
-        "Dedicated support",
-        "Custom integrations",
-        "SLA guarantees",
+        'Everything in Pro',
+        'Team collaboration',
+        'Advanced analytics dashboard',
+        'SSO / SAML support',
+        'Dedicated support',
+        'Custom integrations',
+        'SLA guarantees',
       ],
-      cta: "Contact Us",
-      ctaHref: "mailto:hello@prismaflow.dev",
+      cta: 'Contact Us',
+      ctaHref: 'mailto:hello@prismaflow.dev',
       highlighted: false,
     },
   ]
@@ -614,8 +621,8 @@ function Pricing() {
             key={tier.name}
             className={`relative rounded-2xl border p-8 ${
               tier.highlighted
-                ? "border-primary bg-primary/[0.03] shadow-xl shadow-primary/10"
-                : "border-border/50 bg-card/50"
+                ? 'border-primary bg-primary/[0.03] shadow-xl shadow-primary/10'
+                : 'border-border/50 bg-card/50'
             }`}
           >
             {tier.highlighted && (
@@ -626,9 +633,7 @@ function Pricing() {
             <h3 className="text-xl font-semibold text-foreground">{tier.name}</h3>
             <div className="mt-4 flex items-baseline gap-1">
               <span className="text-4xl font-bold text-foreground">{tier.price}</span>
-              {tier.period && (
-                <span className="text-sm text-muted-foreground">{tier.period}</span>
-              )}
+              {tier.period && <span className="text-sm text-muted-foreground">{tier.period}</span>}
             </div>
             <p className="mt-3 text-sm text-muted-foreground">{tier.description}</p>
 
@@ -645,8 +650,8 @@ function Pricing() {
               href={tier.ctaHref}
               className={`mt-8 flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
                 tier.highlighted
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "border border-border text-foreground hover:bg-muted"
+                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                  : 'border border-border text-foreground hover:bg-muted'
               }`}
             >
               {tier.cta}
@@ -661,10 +666,10 @@ function Pricing() {
 /* ──────────────────────────────────── Stats ── */
 function Stats() {
   const stats = [
-    { label: "CLI Commands",    value: "5" },
-    { label: "API Endpoints",   value: "6" },
-    { label: "Risk Detectors",  value: "7" },
-    { label: "Drift Types",     value: "6" },
+    { label: 'CLI Commands', value: '5' },
+    { label: 'API Endpoints', value: '6' },
+    { label: 'Risk Detectors', value: '7' },
+    { label: 'Drift Types', value: '6' },
   ]
 
   return (

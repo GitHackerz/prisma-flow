@@ -1,29 +1,32 @@
+import { randomBytes } from 'node:crypto'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { serve } from '@hono/node-server'
+import { serveStatic } from '@hono/node-server/serve-static'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger as honoLogger } from 'hono/logger'
 import { secureHeaders } from 'hono/secure-headers'
-import { serve } from '@hono/node-server'
-import { serveStatic } from '@hono/node-server/serve-static'
-import { randomBytes } from 'crypto'
-import { fileURLToPath } from 'url'
-import path from 'path'
-import fs from 'fs'
+import { logger } from '../logger.js'
+import driftRoutes from './routes/drift.js'
 import migrationsRoutes from './routes/migrations.js'
-import statusRoutes    from './routes/status.js'
-import schemaRoutes    from './routes/schema.js'
-import driftRoutes     from './routes/drift.js'
-import { logger }      from '../logger.js'
+import schemaRoutes from './routes/schema.js'
+import statusRoutes from './routes/status.js'
 
 const __filename = fileURLToPath(import.meta.url)
-const __dirname  = path.dirname(__filename)
+const __dirname = path.dirname(__filename)
 
 // ─── Typed context variables ─────────────────────────────────────────────────
 type Variables = {
   projectPath: string
-  requestId:   string
+  requestId: string
 }
 
-export function createServer(projectPath: string): { app: Hono<{ Variables: Variables }>; token: string } {
+export function createServer(projectPath: string): {
+  app: Hono<{ Variables: Variables }>
+  token: string
+} {
   const app = new Hono<{ Variables: Variables }>()
 
   // Generate a per-session bearer token so only the browser we open can reach the API.
@@ -37,7 +40,7 @@ export function createServer(projectPath: string): { app: Hono<{ Variables: Vari
     '*',
     cors({
       origin: (origin) => {
-        if (!origin) return null            // same-origin (served HTML) — allow
+        if (!origin) return null // same-origin (served HTML) — allow
         try {
           const url = new URL(origin)
           if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return origin
@@ -64,7 +67,7 @@ export function createServer(projectPath: string): { app: Hono<{ Variables: Vari
   app.use('/api/*', async (c, next) => {
     const authHeader = c.req.header('Authorization') ?? ''
     const queryToken = c.req.query('token') ?? ''
-    const provided   = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : queryToken
+    const provided = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : queryToken
 
     if (provided !== token) {
       return c.json({ success: false, error: 'Unauthorized' }, 401)
@@ -80,17 +83,17 @@ export function createServer(projectPath: string): { app: Hono<{ Variables: Vari
 
   // ── API Routes ───────────────────────────────────────────────────────────
   app.route('/api/migrations', migrationsRoutes)
-  app.route('/api/status',     statusRoutes)
-  app.route('/api/schema',     schemaRoutes)
-  app.route('/api/drift',      driftRoutes)
+  app.route('/api/status', statusRoutes)
+  app.route('/api/schema', schemaRoutes)
+  app.route('/api/drift', driftRoutes)
 
   // ── Health (no auth required — used by process monitors / Docker) ────────
   app.get('/health', (c) => {
     return c.json({
-      status:  'ok',
+      status: 'ok',
       service: 'prisma-flow',
-      version: process.env['npm_package_version'] ?? '0.0.0',
-      uptime:  process.uptime(),
+      version: process.env.npm_package_version ?? '0.0.0',
+      uptime: process.uptime(),
     })
   })
 
@@ -146,7 +149,7 @@ export function startServer(
   }
 
   process.once('SIGTERM', shutdown)
-  process.once('SIGINT',  shutdown)
+  process.once('SIGINT', shutdown)
 
   return server
 }

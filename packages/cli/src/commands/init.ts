@@ -1,7 +1,6 @@
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import { Command } from 'commander'
-import fs from 'fs/promises'
-import path from 'path'
-import chalk from 'chalk'
 
 const CONFIG_TEMPLATE = `import type { PrismaFlowConfig } from 'prisma-flow'
 
@@ -58,8 +57,6 @@ export function initCommand() {
       try {
         await fs.access(dest)
         if (!options.force) {
-          console.log(chalk.yellow('⚠  prismaflow.config.ts already exists.'))
-          console.log(chalk.gray('   Run with --force to overwrite.\n'))
           process.exit(0)
         }
       } catch {
@@ -67,7 +64,5 @@ export function initCommand() {
       }
 
       await fs.writeFile(dest, CONFIG_TEMPLATE, 'utf-8')
-      console.log(chalk.green('✓ Created prismaflow.config.ts'))
-      console.log(chalk.gray('  Edit the file to customise PrismaFlow for this project.\n'))
     })
 }
