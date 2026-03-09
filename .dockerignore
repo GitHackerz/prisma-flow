@@ -1,0 +1,53 @@
+# Dependencies — never copy node_modules into the build context
+node_modules
+**/node_modules
+
+# Build outputs — each stage builds these from source
+**/dist
+packages/dashboard/.next
+packages/dashboard/out
+packages/cli/public
+
+# Test / coverage artifacts
+**/coverage
+**/*.test.ts
+**/*.test.tsx
+**/vitest.config.ts
+**/vitest.setup.ts
+
+# VCS & IDE
+.git
+.gitignore
+.github
+.vscode
+.idea
+
+# Logs & temp files
+*.log
+npm-debug.log*
+.env
+.env.*
+!.env.example
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Docker files (don't recurse into context)
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+
+# Development config
+.husky
+.prettierrc
+.nvmrc
+.eslintrc*
+eslint.config.*
+
+# Docs
+*.md
+!README.md
+LICENSE
+CHANGELOG.md
+CONTRIBUTING.md

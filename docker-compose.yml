@@ -1,0 +1,64 @@
+version: '3.9'
+
+# ─── PrismaFlow + Postgres local development stack ───────────────────────────
+#
+# Usage:
+#   docker compose up -d
+#   open http://localhost:5555
+#
+# The prisma-flow container mounts the current directory as /project so it can
+# inspect your Prisma schema and migrations.
+
+services:
+  # ── Dashboard + CLI API ────────────────────────────────────────────────────
+  prisma-flow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: prisma-flow:local
+    container_name: prisma-flow
+    restart: unless-stopped
+    ports:
+      - '${PRISMAFLOW_PORT:-5555}:5555'
+    volumes:
+      # Mount the repository root as the managed project
+      - .:/project:ro
+    environment:
+      NODE_ENV:               production
+      PRISMAFLOW_PORT:        '5555'
+      PRISMAFLOW_OPEN_BROWSER: 'false'
+      PRISMAFLOW_LOG_LEVEL:   info
+      DATABASE_URL:           ${DATABASE_URL:-postgresql://prismaflow:prismaflow@postgres:5432/prismaflow_dev}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - prismaflow
+
+  # ── Postgres ──────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: prismaflow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     prismaflow
+      POSTGRES_PASSWORD: prismaflow
+      POSTGRES_DB:       prismaflow_dev
+    ports:
+      - '${POSTGRES_PORT:-5433}:5432'    # 5433 avoids collision with a local pg instance
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U prismaflow -d prismaflow_dev']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - prismaflow
+
+volumes:
+  postgres-data:
+
+networks:
+  prismaflow:
+    driver: bridge
