@@ -9,7 +9,7 @@ const navLinks = [
   { label: 'How It Works', href: '/#how-it-works' },
   { label: 'Installation', href: '/#installation' },
   { label: 'CLI', href: '/#cli' },
-  { label: 'Pricing', href: '/#pricing' },
+  { label: 'Open Source', href: '/#open-source' },
   { label: 'Docs', href: '/docs' },
 ]
 

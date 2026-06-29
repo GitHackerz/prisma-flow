@@ -22,14 +22,25 @@ interface Logger {
 }
 
 function makeConsoleLogger(level: string): Logger {
-  const levels: Record<string, number> = { trace: 10, debug: 20, info: 30, warn: 40, error: 50 }
+  const levels: Record<string, number> = {
+    trace: 10,
+    debug: 20,
+    info: 30,
+    warn: 40,
+    error: 50,
+  }
   const activeLevel = levels[level] ?? 30
 
   function write(severity: string, lvl: number, args: unknown[]): void {
     if (lvl < activeLevel) return
     const obj = typeof args[0] === 'object' && args[0] !== null ? args[0] : {}
     const msg = typeof args[0] === 'string' ? args[0] : ((args[1] as string | undefined) ?? '')
-    const line = JSON.stringify({ time: new Date().toISOString(), level: severity, ...obj, msg })
+    const line = JSON.stringify({
+      time: new Date().toISOString(),
+      level: severity,
+      ...obj,
+      msg,
+    })
     if (lvl >= 40) process.stderr.write(`${line}\n`)
     else process.stdout.write(`${line}\n`)
   }
@@ -55,7 +66,11 @@ function buildLogger(): Logger {
       try {
         const transport = (pino as unknown as { transport: (opts: unknown) => unknown }).transport({
           target: 'pino-pretty',
-          options: { colorize: true, translateTime: 'SYS:standard', ignore: 'pid,hostname' },
+          options: {
+            colorize: true,
+            translateTime: 'SYS:standard',
+            ignore: 'pid,hostname',
+          },
         })
         return pino({ level }, transport)
       } catch {

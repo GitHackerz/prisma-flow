@@ -1,10 +1,21 @@
 {
   "name": "@prisma-flow/shared",
   "version": "0.1.0",
-  "private": true,
+  "description": "Shared PrismaFlow schemas, types, and error classes.",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "homepage": "https://github.com/prisma-flow/prisma-flow#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prisma-flow/prisma-flow.git",
+    "directory": "packages/shared"
+  },
+  "bugs": {
+    "url": "https://github.com/prisma-flow/prisma-flow/issues"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",

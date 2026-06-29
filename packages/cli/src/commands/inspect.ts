@@ -113,7 +113,7 @@ export function inspectCommand() {
           if (options.sql) {
             console.log()
             console.log(chalk.bold('  SQL:'))
-            console.log(chalk.dim('  ' + '─'.repeat(56)))
+            console.log(chalk.dim(`  ${'─'.repeat(56)}`))
             console.log(
               sql
                 .split('\n')
@@ -140,7 +140,9 @@ export function inspectCommand() {
           console.log()
 
           await Promise.all([
-            writeAuditEntry(cwd, 'migration.inspect', 'success', { migration: match.name }),
+            writeAuditEntry(cwd, 'migration.inspect', 'success', {
+              migration: match.name,
+            }),
             trackEvent('inspect', 1),
           ]).catch(() => {})
         } catch (err: unknown) {

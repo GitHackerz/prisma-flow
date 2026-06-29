@@ -99,7 +99,6 @@ export function isFeatureEnabled(feature: keyof FeatureMatrix): boolean {
 /** Throws a FeatureGatedError if the feature isn't available on the current plan. */
 export function requireFeature(feature: keyof FeatureMatrix): void {
   if (!isFeatureEnabled(feature)) {
-    const tier = resolveTier()
     const requiredTier = ['multiProject', 'rbac', 'ssoHooks', 'prioritySupport'].includes(feature)
       ? 'Enterprise'
       : 'Pro'

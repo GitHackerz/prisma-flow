@@ -12,6 +12,8 @@ export interface PrismaProject {
   migrations: Migration[]
   schemaContent: string
   provider: DatabaseProvider | null
+  packageManager: string | null
+  prismaVersion: string | null
 }
 
 /**
@@ -82,6 +84,34 @@ async function readSchemaContent(schemaPath: string): Promise<string> {
   }
 }
 
+async function detectPackageManager(cwd: string): Promise<string | null> {
+  const lockfiles: Array<{ file: string; manager: string }> = [
+    { file: 'package-lock.json', manager: 'npm' },
+    { file: 'pnpm-lock.yaml', manager: 'pnpm' },
+    { file: 'yarn.lock', manager: 'yarn' },
+    { file: 'bun.lockb', manager: 'bun' },
+  ]
+
+  for (const { file, manager } of lockfiles) {
+    if (await tryAccess(path.join(cwd, file))) return manager
+  }
+
+  return null
+}
+
+async function detectPrismaVersion(cwd: string): Promise<string | null> {
+  try {
+    const content = await fs.readFile(path.join(cwd, 'package.json'), 'utf-8')
+    const pkg = JSON.parse(content) as {
+      dependencies?: Record<string, string>
+      devDependencies?: Record<string, string>
+    }
+    return pkg.dependencies?.prisma ?? pkg.devDependencies?.prisma ?? null
+  } catch {
+    return null
+  }
+}
+
 export async function detectPrismaProject(cwd: string): Promise<PrismaProject | null> {
   const schemaPath = await findSchemaPath(cwd)
   if (!schemaPath) return null
@@ -139,6 +169,7 @@ export async function detectPrismaProject(cwd: string): Promise<PrismaProject | 
       migrations.push({
         name: entry.name,
         timestamp: (Number.isNaN(timestamp.getTime()) ? new Date() : timestamp).toISOString(),
+        createdAt: (Number.isNaN(timestamp.getTime()) ? new Date() : timestamp).toISOString(),
         status: 'pending', // overridden by getMigrations() after status check
         sqlPath,
       })
@@ -151,6 +182,19 @@ export async function detectPrismaProject(cwd: string): Promise<PrismaProject | 
   migrations.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
 
   const provider = detectProviderFromSchema(schemaContent)
+  const [packageManager, prismaVersion] = await Promise.all([
+    detectPackageManager(cwd),
+    detectPrismaVersion(cwd),
+  ])
 
-  return { schemaPath, migrationsPath, databaseUrl, migrations, schemaContent, provider }
+  return {
+    schemaPath,
+    migrationsPath,
+    databaseUrl,
+    migrations,
+    schemaContent,
+    provider,
+    packageManager,
+    prismaVersion,
+  }
 }

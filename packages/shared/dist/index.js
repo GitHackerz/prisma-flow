@@ -24,17 +24,16 @@ var DatabaseProviderSchema = z.enum([
   "sqlserver",
   "mongodb"
 ]);
-var DriftRepairStrategySchema = z.enum([
-  "fix-migration",
-  "revert-manual",
-  "sync-history"
-]);
+var DriftRepairStrategySchema = z.enum(["fix-migration", "revert-manual", "sync-history"]);
 var SchemaDiffTypeSchema = z.enum(["added", "removed", "modified"]);
 var MigrationSchema = z.object({
   name: z.string().min(1),
   timestamp: z.string().datetime(),
   status: MigrationStatusSchema,
-  sqlPath: z.string()
+  sqlPath: z.string(),
+  createdAt: z.string().datetime().optional(),
+  appliedAt: z.string().datetime().optional(),
+  durationMs: z.number().int().nonnegative().optional()
 });
 var RiskFactorSchema = z.object({
   pattern: z.string(),
@@ -76,6 +75,18 @@ var DriftResultSchema = z.object({
   status: DriftDetectionStatusSchema,
   errorMessage: z.string().optional()
 });
+var DeploymentReadinessCheckSchema = z.object({
+  id: z.enum(["database", "drift", "failed-migrations", "pending-migrations", "critical-risks"]),
+  label: z.string(),
+  passed: z.boolean(),
+  message: z.string()
+});
+var DeploymentReadinessSchema = z.object({
+  status: z.enum(["ready", "attention", "blocked"]),
+  score: z.number().int().min(0).max(100),
+  summary: z.string(),
+  checks: z.array(DeploymentReadinessCheckSchema)
+});
 var ProjectStatusSchema = z.object({
   connected: z.boolean(),
   migrationsApplied: z.number().int().nonnegative(),
@@ -84,10 +95,16 @@ var ProjectStatusSchema = z.object({
   driftDetected: z.boolean(),
   driftCount: z.number().int().nonnegative(),
   riskLevel: RiskLevelSchema,
+  healthScore: z.number().int().min(0).max(100),
+  deploymentReadiness: DeploymentReadinessSchema,
   lastSync: z.string().datetime(),
   provider: DatabaseProviderSchema.optional(),
   projectName: z.string().optional(),
-  schemaPath: z.string().optional()
+  schemaPath: z.string().optional(),
+  migrationsPath: z.string().optional(),
+  prismaVersion: z.string().optional(),
+  packageManager: z.string().optional(),
+  hasDatabaseUrl: z.boolean().optional()
 });
 var SimulationStatementSchema = z.object({
   sql: z.string(),
@@ -166,10 +183,10 @@ var FeatureFlagsSchema = z.object({
   riskAnalysis: z.boolean().default(true),
   webhookAlerts: z.boolean().default(false),
   auditLog: z.boolean().default(false),
-  ciAnnotations: z.boolean().default(false),
+  ciAnnotations: z.boolean().default(true),
   envComparison: z.boolean().default(false),
   rollbackGen: z.boolean().default(false),
-  simulation: z.boolean().default(false),
+  simulation: z.boolean().default(true),
   gitAwareness: z.boolean().default(false)
 });
 var EnvironmentEntrySchema = z.object({
@@ -280,20 +297,13 @@ var UnauthorizedError = class extends PrismaFlowError {
 };
 var SimulationError = class extends PrismaFlowError {
   constructor(migrationName, cause) {
-    super(
-      `Migration simulation failed for "${migrationName}".`,
-      "SIMULATION_FAILED",
-      cause
-    );
+    super(`Migration simulation failed for "${migrationName}".`, "SIMULATION_FAILED", cause);
     this.name = "SimulationError";
   }
 };
 var RollbackError = class extends PrismaFlowError {
   constructor(migrationName, detail) {
-    super(
-      `Rollback failed for "${migrationName}": ${detail}`,
-      "ROLLBACK_FAILED"
-    );
+    super(`Rollback failed for "${migrationName}": ${detail}`, "ROLLBACK_FAILED");
     this.name = "RollbackError";
   }
 };
@@ -333,6 +343,8 @@ export {
   DatabaseConnectionError,
   DatabaseProviderSchema,
   DeploymentEventSchema,
+  DeploymentReadinessCheckSchema,
+  DeploymentReadinessSchema,
   DriftDetectionError,
   DriftDetectionStatusSchema,
   DriftItemSchema,

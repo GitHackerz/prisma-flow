@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/prisma-flow/prisma-flow/security/advisories/new
+    about: Please report suspected vulnerabilities privately, not in public issues.
+  - name: Questions and support
+    url: https://github.com/prisma-flow/prisma-flow/discussions
+    about: Ask usage questions, share ideas, and discuss workflows here.

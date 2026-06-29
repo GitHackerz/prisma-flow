@@ -2,7 +2,6 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import chalk from 'chalk'
 import { Command } from 'commander'
-import { writeAuditEntry } from '../core/audit.js'
 import { trackEvent } from '../core/telemetry.js'
 
 const CONFIG_TEMPLATE = `import type { PrismaFlowConfig } from 'prisma-flow'
@@ -26,21 +25,16 @@ const config: PrismaFlowConfig = {
   openBrowser: true,
 
   /**
-   * Feature flags — set to true to enable (some require a Pro licence key).
+   * V1 local-first feature flags. Core safety features are free.
    */
   features: {
-    riskAnalysis:  true,   // Free — basic risk labels
-    webhookAlerts: false,  // Pro  — Slack/Discord/HTTP notifications
-    auditLog:      false,  // Pro  — append-only .prismaflow/audit.jsonl
-    ciAnnotations: false,  // Pro  — GitHub Actions / GitLab CI annotations
-    envComparison: false,  // Pro  — cross-environment schema diff
-    rollbackGen:   false,  // Pro  — auto-generate rollback SQL
-    simulation:    false,  // Pro  — run migrations against a shadow database
-    gitAwareness:  false,  // Pro  — detect branch conflicts in migration history
+    riskAnalysis:  true,
+    simulation:    true,
+    ciAnnotations: true,
   },
 
   /**
-   * Named environments for cross-environment comparison (Pro+).
+   * Named environments are reserved for the roadmap.
    * environments: [
    *   { name: 'staging',    databaseUrl: process.env.STAGING_DATABASE_URL! },
    *   { name: 'production', databaseUrl: process.env.PROD_DATABASE_URL! },
@@ -49,25 +43,8 @@ const config: PrismaFlowConfig = {
   environments: [],
 
   /**
-   * Webhook URLs to notify on drift / failure / check events.
-   * Supports Slack, Discord, or any HTTP endpoint.
-   * Can also be set via SLACK_WEBHOOK_URL / DISCORD_WEBHOOK_URL env vars.
-   *
-   * webhooks: [
-   *   { type: 'slack',   url: process.env.SLACK_WEBHOOK_URL! },
-   *   { type: 'discord', url: process.env.DISCORD_WEBHOOK_URL! },
-   * ],
-   */
-  webhooks: [],
-
-  /**
-   * Maximum audit log file size before rotation (default: 10 MB).
-   */
-  auditLogMaxMb: 10,
-
-  /**
    * Risk level that triggers warnings in CI output.
-   * One of: 'low' | 'medium' | 'high'
+   * One of: 'low' | 'medium' | 'high' | 'critical'
    */
   riskThreshold: 'medium',
 }
@@ -97,12 +74,12 @@ export function initCommand() {
         // File does not exist — create it
         try {
           await fs.writeFile(dest, CONFIG_TEMPLATE, 'utf-8')
-          console.log(chalk.green(`✔  Created prismaflow.config.ts`))
-          console.log(chalk.dim(`   Edit it to customise PrismaFlow for your project.`))
+          console.log(chalk.green('✔  Created prismaflow.config.ts'))
+          console.log(chalk.dim('   Edit it to customise PrismaFlow for your project.'))
           console.log()
           console.log(chalk.dim('   Next steps:'))
-          console.log(chalk.dim('     1. Set PRISMAFLOW_LICENCE_KEY to unlock Pro features'))
-          console.log(chalk.dim('     2. Add webhooks for Slack / Discord notifications'))
+          console.log(chalk.dim('     1. Confirm DATABASE_URL is set'))
+          console.log(chalk.dim('     2. Run: prisma-flow doctor'))
           console.log(chalk.dim('     3. Run: prisma-flow dashboard'))
         } catch (writeErr: unknown) {
           const message = writeErr instanceof Error ? writeErr.message : String(writeErr)
@@ -111,9 +88,6 @@ export function initCommand() {
         }
       }
 
-      await Promise.all([
-        writeAuditEntry(cwd, 'migration.check', 'success', { action: 'init' }),
-        trackEvent('init', 0),
-      ]).catch(() => {})
+      await trackEvent('init', 0).catch(() => {})
     })
 }

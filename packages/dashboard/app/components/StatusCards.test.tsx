@@ -12,6 +12,13 @@ const baseStatus: ProjectStatus = {
   driftDetected: false,
   driftCount: 0,
   riskLevel: 'low',
+  healthScore: 100,
+  deploymentReadiness: {
+    status: 'ready',
+    score: 100,
+    summary: 'Ready for deployment',
+    checks: [],
+  },
   lastSync: new Date().toISOString(),
   projectName: 'test-project',
   schemaPath: '/project/prisma/schema.prisma',

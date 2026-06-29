@@ -1,5 +1,6 @@
 'use client'
 
+import { AlertTriangle, CheckCircle2, XCircle } from 'lucide-react'
 import type { ProjectStatus } from '../../lib/api'
 import { Badge } from './ui/badge'
 
@@ -28,15 +29,11 @@ export function HealthCheck({ status }: { status: ProjectStatus | null }) {
     error: 'bg-destructive/10 text-destructive hover:bg-destructive/10 border-destructive/20',
   }
 
-  const icons: Record<typeof health, string> = {
-    healthy: '✅',
-    warning: '⚠️',
-    error: '❌',
-  }
+  const Icon = health === 'healthy' ? CheckCircle2 : health === 'warning' ? AlertTriangle : XCircle
 
   return (
     <Badge className={`px-3 py-1 text-sm font-medium border ${variants[health]}`}>
-      <span className="mr-2">{icons[health]}</span>
+      <Icon className="mr-2 h-3.5 w-3.5" />
       {message}
     </Badge>
   )

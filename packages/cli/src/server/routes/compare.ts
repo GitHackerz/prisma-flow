@@ -20,7 +20,10 @@ app.get('/', async (c) => {
     const envList: EnvEntry[] = []
     for (const [name, entry] of Object.entries(configEnvs)) {
       if (typeof entry === 'object' && entry !== null && 'databaseUrl' in entry) {
-        envList.push({ name, databaseUrl: (entry as { databaseUrl: string }).databaseUrl })
+        envList.push({
+          name,
+          databaseUrl: (entry as { databaseUrl: string }).databaseUrl,
+        })
       }
     }
 

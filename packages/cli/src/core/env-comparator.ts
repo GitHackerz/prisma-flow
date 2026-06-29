@@ -8,12 +8,9 @@
  *  - Diff applied migration lists
  */
 
-import { execFile } from 'node:child_process'
-import { promisify } from 'node:util'
 import type { EnvironmentComparison, MigrationHistoryDiff } from '@prisma-flow/shared'
 import { EnvironmentComparisonError } from '@prisma-flow/shared'
-
-const execAsync = promisify(execFile)
+import { execPrisma } from './prisma-cli.js'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -68,14 +65,18 @@ async function queryMigrationStatus(
   databaseUrl: string,
   schemaPath: string,
   cwd: string,
-): Promise<{ applied: string[]; pending: string[]; failed: string[]; reachable: boolean }> {
+): Promise<{
+  applied: string[]
+  pending: string[]
+  failed: string[]
+  reachable: boolean
+}> {
   try {
     const env = { ...process.env, DATABASE_URL: databaseUrl }
-    const { stdout } = await execAsync(
-      'npx',
-      ['prisma', 'migrate', 'status', '--schema', schemaPath],
-      { cwd, env, timeout: 30_000 },
-    )
+    const { stdout } = await execPrisma(cwd, ['migrate', 'status', '--schema', schemaPath], {
+      env,
+      timeout: 30_000,
+    })
     return { ...parseStatusOutput(stdout), reachable: true }
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err))
@@ -180,11 +181,18 @@ export async function compareEnvironments(
   }
 
   const states = await fetchEnvironmentStates(environments, schemaPath, cwd)
-  const reference = states[0]!
+  const [reference, ...targets] = states
+  if (!reference) {
+    throw new EnvironmentComparisonError(
+      'configuration',
+      'comparison',
+      new Error('No environment states were returned'),
+    )
+  }
 
   const diffs: MigrationHistoryDiff[] = []
-  for (let i = 1; i < states.length; i++) {
-    diffs.push(diffEnvironments(reference, states[i]!))
+  for (const target of targets) {
+    diffs.push(diffEnvironments(reference, target))
   }
 
   const allInSync = diffs.every((d) => d.inSync)

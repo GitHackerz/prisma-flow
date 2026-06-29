@@ -1,0 +1,45 @@
+name: Feature request
+description: Propose a scoped improvement to the CLI, dashboard, or docs.
+title: "feat: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user workflow or Prisma migration problem should this solve?
+      placeholder: When reviewing migration risk in CI, I need...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior, command, UI, or documentation change.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - CLI
+        - Dashboard
+        - Website/docs
+        - Shared schemas/types
+        - CI/release
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds or simpler approaches?
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This fits the local-first V1 scope and does not require cloud accounts, billing, or hosted services.
+          required: true

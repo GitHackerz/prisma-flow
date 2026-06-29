@@ -5,12 +5,9 @@
  * Outputs a list of `SchemaDiff` items describing each model/field change.
  */
 
-import { execFile } from 'node:child_process'
 import fs from 'node:fs/promises'
-import { promisify } from 'node:util'
 import type { SchemaDiff, SchemaDiffType } from '@prisma-flow/shared'
-
-const execAsync = promisify(execFile)
+import { execPrisma } from './prisma-cli.js'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Prisma schema text parser (lightweight — regex-based, not full AST)
@@ -32,31 +29,32 @@ function parseModels(schema: string): Map<string, ParsedModel> {
 
   // Match each model block
   const modelRegex = /model\s+(\w+)\s*\{([^}]+)\}/g
-  let match: RegExpExecArray | null
+  let match: RegExpExecArray | null = modelRegex.exec(schema)
 
-  while ((match = modelRegex.exec(schema)) !== null) {
+  while (match !== null) {
     const [, modelName, body] = match
-    if (!modelName || !body) continue
+    if (modelName && body) {
+      const fields: ModelField[] = []
+      for (const line of body.split('\n')) {
+        const trimmed = line.trim()
+        // Skip blank lines and decorators
+        if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('@')) continue
 
-    const fields: ModelField[] = []
-    for (const line of body.split('\n')) {
-      const trimmed = line.trim()
-      // Skip blank lines and decorators
-      if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('@')) continue
+        const parts = trimmed.split(/\s+/)
+        if (!parts[0] || !parts[1]) continue
+        // Skip prisma directives like @@...
+        if (parts[0].startsWith('@@')) continue
 
-      const parts = trimmed.split(/\s+/)
-      if (!parts[0] || !parts[1]) continue
-      // Skip prisma directives like @@...
-      if (parts[0].startsWith('@@')) continue
+        fields.push({
+          name: parts[0],
+          type: parts[1],
+          modifiers: parts.slice(2),
+        })
+      }
 
-      fields.push({
-        name: parts[0],
-        type: parts[1],
-        modifiers: parts.slice(2),
-      })
+      models.set(modelName, { name: modelName, fields })
     }
-
-    models.set(modelName, { name: modelName, fields })
+    match = modelRegex.exec(schema)
   }
 
   return models
@@ -185,10 +183,9 @@ export async function diffSchemaVsDatabase(
   const env = { ...process.env, DATABASE_URL: databaseUrl }
 
   try {
-    const { stdout } = await execAsync(
-      'npx',
+    const { stdout } = await execPrisma(
+      cwd,
       [
-        'prisma',
         'migrate',
         'diff',
         '--from-schema-datamodel',
@@ -197,7 +194,7 @@ export async function diffSchemaVsDatabase(
         databaseUrl,
         '--script',
       ],
-      { cwd, env, timeout: 30_000 },
+      { env, timeout: 30_000 },
     )
 
     // Parse the SQL diff output into structured diffs

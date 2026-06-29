@@ -112,7 +112,9 @@ describe('Hono API Server', () => {
 
     it('respects page and limit query params', async () => {
       const res = await app.request(`/api/migrations?token=${token}&page=2&limit=10`)
-      const body = (await res.json()) as { pagination: { page: number; limit: number } }
+      const body = (await res.json()) as {
+        pagination: { page: number; limit: number }
+      }
       expect(body.pagination.page).toBe(2)
       expect(body.pagination.limit).toBe(10)
     })
@@ -133,7 +135,9 @@ describe('Hono API Server', () => {
 
   describe('POST /api/drift/check', () => {
     it('forces a fresh drift check', async () => {
-      const res = await app.request(`/api/drift/check?token=${token}`, { method: 'POST' })
+      const res = await app.request(`/api/drift/check?token=${token}`, {
+        method: 'POST',
+      })
       expect(res.status).toBe(200)
       const body = (await res.json()) as Record<string, unknown>
       expect(body.success).toBe(true)

@@ -9,6 +9,7 @@ import { historyCommand } from './commands/history.js'
 import { initCommand } from './commands/init.js'
 import { inspectCommand } from './commands/inspect.js'
 import { repairCommand } from './commands/repair.js'
+import { reportCommand } from './commands/report.js'
 import { rollbackCommand } from './commands/rollback.js'
 import { simulateCommand } from './commands/simulate.js'
 import { statusCommand } from './commands/status.js'
@@ -23,6 +24,7 @@ program
 program.addCommand(dashboardCommand(), { isDefault: true })
 program.addCommand(statusCommand())
 program.addCommand(checkCommand())
+program.addCommand(reportCommand())
 program.addCommand(initCommand())
 program.addCommand(doctorCommand())
 

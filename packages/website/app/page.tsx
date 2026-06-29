@@ -5,16 +5,15 @@ import {
   BarChart3,
   Check,
   ChevronRight,
+  Database,
   Download,
   Eye,
   FileCode,
   GitBranch,
   Layers,
   Search,
-  Server,
   Shield,
   Terminal,
-  Webhook,
   Zap,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -28,11 +27,10 @@ import { Section, SectionHeader } from './components/Section'
 function Hero() {
   return (
     <section className="relative overflow-hidden pt-32 pb-20 sm:pt-40 sm:pb-32">
-      {/* Background grid + glow */}
+      {/* Background grid */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[600px] w-[900px] rounded-full bg-primary/[0.07] blur-[120px]" />
-        <div className="absolute top-1/3 left-1/4 h-[300px] w-[400px] rounded-full bg-emerald-500/[0.05] blur-[100px]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-border/70" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
@@ -47,11 +45,11 @@ function Hero() {
         <h1 className="animate-fade-in-up-delay-1 text-4xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
           Visual Prisma
           <br />
-          <span className="gradient-text">Migration Management</span>
+          <span className="gradient-text">Migration Safety</span>
         </h1>
 
         <p className="animate-fade-in-up-delay-2 mx-auto mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed sm:text-xl">
-          Detect schema drift, analyse migration risks, and ship database changes safely —{' '}
+          See migration state, schema drift, risk, and deployment readiness before you ship - a{' '}
           <strong className="text-foreground">CLI + web dashboard</strong> for every Prisma project.
         </p>
 
@@ -88,7 +86,7 @@ function Hero() {
             </div>
             <div className="p-6 font-mono text-sm leading-7">
               <div className="text-white/40">$ npx prisma-flow</div>
-              <div className="mt-3 text-white/60">🔍 Detecting Prisma project...</div>
+              <div className="mt-3 text-white/60">Detecting Prisma project...</div>
               <div className="mt-1.5">
                 <span className="text-emerald-400">✓</span>
                 <span className="text-white/80"> Prisma project detected</span>
@@ -106,7 +104,7 @@ function Hero() {
                 <span className="text-white/80"> PrismaFlow dashboard running</span>
               </div>
               <div className="mt-1.5 text-violet-400">→ http://localhost:5555?token=a3f8c2...</div>
-              <div className="mt-3 text-white/40">Auth token printed above — keep it private.</div>
+              <div className="mt-3 text-white/40">Auth token printed above - keep it private.</div>
               <div className="text-white/40">Press Ctrl+C to stop</div>
               <div className="mt-2 inline-block h-4 w-2 animate-pulse-slow bg-white/60" />
             </div>
@@ -117,6 +115,75 @@ function Hero() {
   )
 }
 
+/* ─────────────────────────────────────── Workflow Snapshot ── */
+function WorkflowSnapshot() {
+  const items = [
+    {
+      icon: Database,
+      title: 'Project detection',
+      description:
+        'Finds schema, migrations, provider, Prisma version, package manager, and DATABASE_URL state.',
+    },
+    {
+      icon: Activity,
+      title: 'Live readiness',
+      description:
+        'Combines connection, pending migrations, failed migrations, drift, and critical risks into one score.',
+    },
+    {
+      icon: Shield,
+      title: 'Risk evidence',
+      description:
+        'Highlights destructive SQL and explains what needs review before a deploy proceeds.',
+    },
+    {
+      icon: GitBranch,
+      title: 'CI artifacts',
+      description:
+        'Produces deterministic exit codes and JSON or Markdown reports for pull requests.',
+    },
+  ]
+
+  return (
+    <Section>
+      <SectionHeader
+        badge="V1 Workflow"
+        title="What you see in the first minute"
+        description="PrismaFlow is built for fast operational clarity: detect the project, assess readiness, inspect the evidence, and export the result."
+      />
+      <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {items.map((item) => (
+          <div key={item.title} className="rounded-xl border border-border/50 bg-card/50 p-5">
+            <item.icon className="h-5 w-5 text-primary" />
+            <h3 className="mt-4 font-semibold text-foreground">{item.title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+          </div>
+        ))}
+      </div>
+    </Section>
+  )
+}
+
+/* ─────────────────────────────────────── Product Preview ── */
+function ProductPreview() {
+  return (
+    <Section className="pt-0">
+      <SectionHeader
+        badge="Dashboard"
+        title="A real control surface for migration review"
+        description="The dashboard turns raw Prisma state into scan-friendly project metadata, readiness checks, and deploy actions."
+      />
+      <div className="mx-auto mt-12 max-w-6xl overflow-hidden rounded-2xl border border-border/50 bg-card/50 shadow-2xl shadow-primary/5">
+        <img
+          src="/dashboard-preview.png"
+          alt="PrismaFlow dashboard showing project status, readiness, and migration risk"
+          className="block h-auto w-full"
+        />
+      </div>
+    </Section>
+  )
+}
+
 /* ──────────────────────────────────────────── Features Grid ── */
 function FeaturesGrid() {
   const features = [
@@ -124,7 +191,7 @@ function FeaturesGrid() {
       icon: Eye,
       title: 'Schema Drift Detection',
       description:
-        'Continuously compare your Prisma schema to the live database. Detect manual ALTER TABLE changes, orphaned indexes, and constraint mismatches in real time.',
+        'Compare your Prisma schema to the live database. Detect manual ALTER TABLE changes, orphaned indexes, and constraint mismatches before deploy.',
       iconColor: 'text-primary' as const,
     },
     {
@@ -145,42 +212,42 @@ function FeaturesGrid() {
       icon: Terminal,
       title: 'Powerful CLI',
       description:
-        'Five sub-commands — dashboard, status, check, init, doctor — give you full control from the terminal. JSON output for scripting, structured exit codes for CI.',
+        'Dashboard, status, check, report, doctor, inspect, simulate, and history commands give you control from the terminal. JSON output supports scripts and CI.',
       iconColor: 'text-sky-400' as const,
     },
     {
       icon: GitBranch,
       title: 'CI/CD Ready',
       description:
-        'Run prisma-flow check --ci in GitHub Actions, GitLab CI, or Jenkins. Structured exit codes (0–4) and JSON output integrate with any pipeline.',
+        'Run prisma-flow check --ci in GitHub Actions, GitLab CI, or Jenkins. Structured exit codes (0-5) and JSON output integrate with any pipeline.',
       iconColor: 'text-primary' as const,
     },
     {
       icon: Shield,
       title: 'Secure by Default',
       description:
-        'Per-session 192-bit auth tokens, local-only CORS policy, execFile() for child processes (no shell injection), and no external network calls.',
+        'Per-session 192-bit auth tokens, localhost-only CORS policy, execFile() child processes, and no cloud calls unless telemetry is explicitly enabled.',
       iconColor: 'text-emerald-400' as const,
     },
     {
-      icon: Webhook,
-      title: 'Webhook Notifications',
+      icon: Layers,
+      title: 'Schema Explorer',
       description:
-        'Get Slack, Discord, or generic HTTP notifications when drift is detected or a migration fails. Configure per-event or for all events.',
+        'Browse Prisma models, fields, relations, enums, indexes, and constraints with an ERD-style overview built from your schema.',
       iconColor: 'text-amber-400' as const,
     },
     {
       icon: BarChart3,
       title: 'Migration Timeline',
       description:
-        'A horizontal visual timeline showing the chronological history of all migrations — applied, pending, and failed — with hover-to-inspect details.',
+        'A visual timeline showing applied, pending, and failed migrations with timestamps, duration, and risk context.',
       iconColor: 'text-sky-400' as const,
     },
     {
-      icon: Server,
-      title: 'Docker Ready',
+      icon: Zap,
+      title: 'Deployment Readiness',
       description:
-        'Multi-stage Dockerfile and docker-compose.yml included. Mount your project, set DATABASE_URL, and run locally or in any containerized environment.',
+        'A health score and readiness checklist summarize drift, failed migrations, pending work, and critical risks before deploy.',
       iconColor: 'text-primary' as const,
     },
   ]
@@ -189,8 +256,8 @@ function FeaturesGrid() {
     <Section id="features">
       <SectionHeader
         badge="Features"
-        title="Everything you need to manage Prisma migrations"
-        description="From drift detection to risk analysis, PrismaFlow gives your team full visibility into database changes — before they hit production."
+        title="Everything V1 needs for Prisma migration confidence"
+        description="From drift detection to schema exploration, PrismaFlow gives developers clear visibility into database changes before they hit production."
       />
       <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {features.map((f) => (
@@ -230,7 +297,7 @@ function HowItWorks() {
       icon: Shield,
       title: 'Protect',
       description:
-        'Integrate with CI/CD using the check command. Block deploys when drift or failed migrations are detected. Alert your team via webhooks.',
+        'Integrate with CI/CD using the check command. Block deploys when drift, failed migrations, or critical risks are detected.',
     },
   ]
 
@@ -239,7 +306,7 @@ function HowItWorks() {
       <SectionHeader
         badge="How It Works"
         title="Four steps to safe migrations"
-        description="PrismaFlow wraps the Prisma CLI — no Prisma dependency changes, no database modifications."
+        description="PrismaFlow wraps the Prisma CLI. Dashboard, status, check, and report flows are read-only by default."
       />
       <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         {steps.map((step) => (
@@ -370,13 +437,19 @@ function CLISection() {
       name: 'prisma-flow status',
       aka: null,
       description: 'Print migration & drift state to the terminal',
-      flags: ['--json'],
+      flags: ['--json', '--quiet'],
     },
     {
       name: 'prisma-flow check',
       aka: null,
-      description: 'Validate state for CI/CD — structured exit codes (0-4)',
-      flags: ['--ci', '--json'],
+      description: 'Validate state for CI/CD with structured exit codes (0-5)',
+      flags: ['--ci', '--json', '--fail-on-risk <level>'],
+    },
+    {
+      name: 'prisma-flow report',
+      aka: null,
+      description: 'Generate a local JSON or Markdown report for reviews and CI artifacts',
+      flags: ['--format <format>', '-o, --output <path>'],
     },
     {
       name: 'prisma-flow init',
@@ -388,7 +461,49 @@ function CLISection() {
       name: 'prisma-flow doctor',
       aka: null,
       description: 'Run environment checks (Node, Prisma, DB, schema, migrations)',
-      flags: [],
+      flags: ['--json'],
+    },
+    {
+      name: 'prisma-flow inspect',
+      aka: null,
+      description: 'Inspect one migration with SQL, risk analysis, and simulation summary',
+      flags: ['--json', '--sql', '--rollback'],
+    },
+    {
+      name: 'prisma-flow simulate',
+      aka: null,
+      description: 'Preview migration statements and destructive warnings before execution',
+      flags: ['--json', '--fail-on-destructive'],
+    },
+    {
+      name: 'prisma-flow history',
+      aka: null,
+      description: 'Show a terminal migration timeline with status and risk context',
+      flags: ['--limit <n>', '--json', '--git'],
+    },
+    {
+      name: 'prisma-flow diff',
+      aka: null,
+      description: 'Compare the Prisma schema with a database URL',
+      flags: ['--from <url>', '--json', '--breaking-only'],
+    },
+    {
+      name: 'prisma-flow compare',
+      aka: null,
+      description: 'Compare configured environments for migration divergence',
+      flags: ['--envs <names>', '--json'],
+    },
+    {
+      name: 'prisma-flow repair',
+      aka: null,
+      description: 'List drift repair suggestions and optionally apply safe steps',
+      flags: ['--apply', '--json'],
+    },
+    {
+      name: 'prisma-flow rollback',
+      aka: null,
+      description: 'Generate rollback SQL for a migration',
+      flags: ['--json', '--print-sql', '--include-manual'],
     },
   ]
 
@@ -396,8 +511,8 @@ function CLISection() {
     <Section id="cli" className="bg-card/30">
       <SectionHeader
         badge="CLI"
-        title="Five commands, full control"
-        description="Everything you need from the terminal — interactive dashboard, quick status checks, CI/CD validation, and environment diagnostics."
+        title="Complete local CLI surface"
+        description="The website now covers the full shipped command set: core dashboard and CI commands, analysis tools, and advanced local utilities."
       />
 
       <div className="mx-auto mt-16 max-w-4xl space-y-4">
@@ -457,7 +572,9 @@ jobs:
       - name: Check migration state
         run: npx prisma-flow check --ci
         env:
-          DATABASE_URL: \${{ secrets.DATABASE_URL }}`}
+          DATABASE_URL: \${{ secrets.DATABASE_URL }}
+      - name: Generate report
+        run: npx prisma-flow report --format markdown --output prismaflow-report.md`}
         />
       </div>
     </Section>
@@ -470,8 +587,8 @@ function APIPreview() {
     <Section id="api">
       <SectionHeader
         badge="REST API"
-        title="Programmatic access to everything"
-        description="The dashboard is powered by a clean REST API. Use it from scripts, custom dashboards, or monitoring tools."
+        title="Programmatic access to local migration state"
+        description="The dashboard is powered by a token-protected local REST API. Use it from scripts, custom dashboards, or local monitors."
       />
 
       <div className="mx-auto mt-16 grid max-w-5xl gap-6 lg:grid-cols-2">
@@ -481,7 +598,11 @@ function APIPreview() {
           </h3>
           <div className="space-y-3">
             {[
-              { method: 'GET', path: '/api/status', desc: 'Project & database health' },
+              {
+                method: 'GET',
+                path: '/api/status',
+                desc: 'Project & database health',
+              },
               {
                 method: 'GET',
                 path: '/api/migrations',
@@ -492,9 +613,31 @@ function APIPreview() {
                 path: '/api/migrations/:name',
                 desc: 'Single migration SQL + analysis',
               },
-              { method: 'GET', path: '/api/drift', desc: 'Current drift state (cached 10s)' },
-              { method: 'POST', path: '/api/drift/check', desc: 'Force-refresh drift analysis' },
-              { method: 'GET', path: '/api/schema', desc: 'Parsed models & enums' },
+              {
+                method: 'GET',
+                path: '/api/drift',
+                desc: 'Current drift state (cached 10s)',
+              },
+              {
+                method: 'POST',
+                path: '/api/drift/check',
+                desc: 'Force-refresh drift analysis',
+              },
+              {
+                method: 'GET',
+                path: '/api/risks',
+                desc: 'Risk score for all migrations',
+              },
+              {
+                method: 'GET',
+                path: '/api/simulate/:name',
+                desc: 'Migration simulation result',
+              },
+              {
+                method: 'GET',
+                path: '/api/schema',
+                desc: 'Parsed models & enums',
+              },
             ].map((ep) => (
               <div
                 key={ep.path}
@@ -530,6 +673,12 @@ function APIPreview() {
     "driftDetected": false,
     "driftCount": 0,
     "riskLevel": "low",
+    "healthScore": 100,
+    "deploymentReadiness": {
+      "status": "ready",
+      "score": 100
+    },
+    "provider": "postgresql",
     "lastSync": "2026-02-28T12:00:00Z"
   }
 }`}
@@ -549,115 +698,56 @@ function APIPreview() {
   )
 }
 
-/* ──────────────────────────────────── Pricing ── */
-function Pricing() {
-  const tiers = [
-    {
-      name: 'Free',
-      price: '$0',
-      period: 'forever',
-      description: 'Everything you need for solo projects and small teams.',
-      features: [
-        'Visual migration timeline',
-        'Real-time drift detection',
-        'Risk analysis for every migration',
-        'CI/CD check command',
-        'doctor & init commands',
-        'Local REST API',
-        'Docker support',
-      ],
-      cta: 'Get Started',
-      ctaHref: '#installation',
-      highlighted: false,
-    },
-    {
-      name: 'Pro',
-      price: '$19',
-      period: '/month',
-      description: 'Advanced features for teams shipping to production daily.',
-      features: [
-        'Everything in Free',
-        'Webhook notifications (Slack, Discord, HTTP)',
-        'JSONL audit log',
-        'CI annotations',
-        'Priority support',
-        'Extended analytics',
-      ],
-      cta: 'Coming Soon',
-      ctaHref: '#',
-      highlighted: true,
-    },
-    {
-      name: 'Enterprise',
-      price: 'Custom',
-      period: '',
-      description: 'For organizations with strict compliance and scale requirements.',
-      features: [
-        'Everything in Pro',
-        'Team collaboration',
-        'Advanced analytics dashboard',
-        'SSO / SAML support',
-        'Dedicated support',
-        'Custom integrations',
-        'SLA guarantees',
-      ],
-      cta: 'Contact Us',
-      ctaHref: 'mailto:hello@prismaflow.dev',
-      highlighted: false,
-    },
+/* ──────────────────────────────────── Open Source ── */
+function OpenSource() {
+  const features = [
+    'Unlimited local Prisma projects',
+    'Visual migration timeline',
+    'Drift detection with explanations',
+    'Risk analysis and recommendations',
+    'Migration simulation',
+    'Schema explorer and ERD-style overview',
+    'Health score and deployment readiness',
+    'Reports and CI integration',
   ]
 
   return (
-    <Section id="pricing">
+    <Section id="open-source">
       <SectionHeader
-        badge="Pricing"
-        title="Start free, scale when ready"
-        description="The core features are free and open source. Upgrade for team-oriented features like webhooks, audit logs, and collaboration."
+        badge="Open Source"
+        title="V1 is free, local-first, and unlimited"
+        description="No account, no cloud dependency, no artificial usage limits. PrismaFlow V1 focuses only on Prisma migration visibility and deployment confidence."
       />
 
-      <div className="mx-auto mt-16 grid max-w-5xl gap-8 lg:grid-cols-3">
-        {tiers.map((tier) => (
-          <div
-            key={tier.name}
-            className={`relative rounded-2xl border p-8 ${
-              tier.highlighted
-                ? 'border-primary bg-primary/[0.03] shadow-xl shadow-primary/10'
-                : 'border-border/50 bg-card/50'
-            }`}
-          >
-            {tier.highlighted && (
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3.5 py-1 text-xs font-semibold text-primary-foreground">
-                Most Popular
-              </div>
-            )}
-            <h3 className="text-xl font-semibold text-foreground">{tier.name}</h3>
-            <div className="mt-4 flex items-baseline gap-1">
-              <span className="text-4xl font-bold text-foreground">{tier.price}</span>
-              {tier.period && <span className="text-sm text-muted-foreground">{tier.period}</span>}
-            </div>
-            <p className="mt-3 text-sm text-muted-foreground">{tier.description}</p>
-
-            <ul className="mt-8 space-y-3">
-              {tier.features.map((f) => (
-                <li key={f} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-
-            <Link
-              href={tier.ctaHref}
-              className={`mt-8 flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                tier.highlighted
-                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                  : 'border border-border text-foreground hover:bg-muted'
-              }`}
-            >
-              {tier.cta}
-            </Link>
+      <div className="mx-auto mt-16 max-w-3xl rounded-2xl border border-border/50 bg-card/50 p-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h3 className="text-xl font-semibold text-foreground">Open Source V1</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Everything needed to understand and safely ship Prisma database changes.
+            </p>
           </div>
-        ))}
+          <div className="flex items-baseline gap-1">
+            <span className="text-4xl font-bold text-foreground">$0</span>
+            <span className="text-sm text-muted-foreground">forever</span>
+          </div>
+        </div>
+
+        <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+          {features.map((feature) => (
+            <li key={feature} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+              {feature}
+            </li>
+          ))}
+        </ul>
+
+        <Link
+          href="#installation"
+          className="mt-8 inline-flex items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          Get Started
+        </Link>
       </div>
     </Section>
   )
@@ -666,8 +756,8 @@ function Pricing() {
 /* ──────────────────────────────────── Stats ── */
 function Stats() {
   const stats = [
-    { label: 'CLI Commands', value: '5' },
-    { label: 'API Endpoints', value: '6' },
+    { label: 'CLI Commands', value: '13' },
+    { label: 'API Endpoints', value: '18+' },
     { label: 'Risk Detectors', value: '7' },
     { label: 'Drift Types', value: '6' },
   ]
@@ -691,9 +781,7 @@ function BottomCTA() {
   return (
     <Section>
       <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-primary/[0.03] px-8 py-16 text-center sm:px-16">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[300px] w-[500px] rounded-full bg-primary/[0.08] blur-[100px]" />
-        </div>
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-primary/30" />
         <div className="relative">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Ready to ship migrations safely?
@@ -734,12 +822,14 @@ export default function Home() {
       <main>
         <Hero />
         <Stats />
+        <WorkflowSnapshot />
+        <ProductPreview />
         <FeaturesGrid />
         <HowItWorks />
         <Installation />
         <CLISection />
         <APIPreview />
-        <Pricing />
+        <OpenSource />
         <BottomCTA />
       </main>
       <Footer />

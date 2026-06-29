@@ -21,7 +21,11 @@ export function rollbackCommand() {
     .action(
       async (
         migrationQuery: string,
-        options: { json?: boolean; printSql?: boolean; includeManual?: boolean },
+        options: {
+          json?: boolean
+          printSql?: boolean
+          includeManual?: boolean
+        },
       ) => {
         const cwd = process.cwd()
         try {
@@ -96,7 +100,9 @@ export function rollbackCommand() {
           console.log()
 
           await Promise.all([
-            writeAuditEntry(cwd, 'migration.rollback', 'success', { migration: match.name }),
+            writeAuditEntry(cwd, 'migration.rollback', 'success', {
+              migration: match.name,
+            }),
             trackEvent('rollback', plan.steps.length),
           ]).catch(() => {})
 

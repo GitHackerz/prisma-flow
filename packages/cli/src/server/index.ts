@@ -6,7 +6,6 @@ import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { logger as honoLogger } from 'hono/logger'
 import { secureHeaders } from 'hono/secure-headers'
 import { logger } from '../logger.js'
 import auditRoutes from './routes/audit.js'
@@ -71,7 +70,20 @@ export function createServer(projectPath: string): {
     await next()
   })
 
-  app.use('*', honoLogger())
+  app.use('*', async (c, next) => {
+    const started = Date.now()
+    await next()
+    logger.debug(
+      {
+        method: c.req.method,
+        path: new URL(c.req.url).pathname,
+        status: c.res.status,
+        durationMs: Date.now() - started,
+        requestId: c.get('requestId'),
+      },
+      'HTTP request',
+    )
+  })
 
   // ── Auth token guard (all /api/* routes) ────────────────────────────────
   app.use('/api/*', async (c, next) => {

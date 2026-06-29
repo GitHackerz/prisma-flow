@@ -6,35 +6,34 @@
 
 import {
   Activity,
-  ArrowLeftRight,
-  ClipboardList,
   Database,
   FlaskConical,
-  GitBranch,
-  History,
   LayoutDashboard,
-  Settings,
-  Wrench,
+  Network,
+  ShieldAlert,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { cn } from '../../lib/utils'
 
 const nav = [
   { label: 'Overview', href: '/', icon: LayoutDashboard },
   { label: 'Migrations', href: '/migrations', icon: Database },
   { label: 'Drift', href: '/drift', icon: Activity },
-  { label: 'Diff', href: '/diff', icon: ArrowLeftRight },
+  { label: 'Risks', href: '/risks', icon: ShieldAlert },
   { label: 'Simulate', href: '/simulate', icon: FlaskConical },
-  { label: 'Repair', href: '/repair', icon: Wrench },
-  { label: 'Compare', href: '/compare', icon: GitBranch },
-  { label: 'History', href: '/history', icon: History },
-  { label: 'Audit', href: '/audit', icon: ClipboardList },
-  { label: 'Settings', href: '/settings', icon: Settings },
+  { label: 'Schema', href: '/schema', icon: Network },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
+  const [token, setToken] = useState<string | null>(null)
+
+  useEffect(() => {
+    setToken(new URLSearchParams(window.location.search).get('token'))
+  }, [])
+
   return (
     <aside className="flex h-screen w-56 flex-col border-r bg-sidebar shrink-0">
       {/* Logo */}
@@ -48,10 +47,12 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
         {nav.map(({ label, href, icon: Icon }) => {
           const active = href === '/' ? pathname === '/' : pathname.startsWith(href)
+          const hrefWithToken = token ? `${href}?token=${encodeURIComponent(token)}` : href
+
           return (
             <Link
               key={href}
-              href={href}
+              href={hrefWithToken}
               className={cn(
                 'flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                 active

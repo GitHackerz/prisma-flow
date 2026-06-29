@@ -7,7 +7,9 @@ interface Migration {
     timestamp: string;
     status: MigrationStatus;
     sqlPath: string;
+    createdAt?: string;
     appliedAt?: string;
+    durationMs?: number;
 }
 interface MigrationDetail extends Migration {
     sql: string;
@@ -43,10 +45,29 @@ interface ProjectStatus {
     driftDetected: boolean;
     driftCount: number;
     riskLevel: RiskLevel;
+    healthScore: number;
+    deploymentReadiness: DeploymentReadiness;
     lastSync: string;
     provider?: DatabaseProvider;
     projectName?: string;
     schemaPath?: string;
+    migrationsPath?: string;
+    prismaVersion?: string;
+    packageManager?: string;
+    hasDatabaseUrl?: boolean;
+}
+type DeploymentReadinessStatus = 'ready' | 'attention' | 'blocked';
+interface DeploymentReadinessCheck {
+    id: 'database' | 'drift' | 'failed-migrations' | 'pending-migrations' | 'critical-risks';
+    label: string;
+    passed: boolean;
+    message: string;
+}
+interface DeploymentReadiness {
+    status: DeploymentReadinessStatus;
+    score: number;
+    summary: string;
+    checks: DeploymentReadinessCheck[];
 }
 interface ApiSuccess<T> {
     success: true;
@@ -82,13 +103,13 @@ interface FeatureFlags {
     webhookAlerts: boolean;
     auditLog: boolean;
     ciAnnotations: boolean;
-    /** Multi-environment comparison (Pro+) */
+    /** Roadmap: multi-environment comparison */
     envComparison: boolean;
-    /** Rollback generation (Pro+) */
+    /** Roadmap: rollback generation */
     rollbackGen: boolean;
-    /** Migration simulation (Pro+) */
+    /** Migration simulation */
     simulation: boolean;
-    /** Git-awareness features (Pro+) */
+    /** Roadmap: git-awareness features */
     gitAwareness: boolean;
 }
 interface PrismaFlowConfig {
@@ -323,16 +344,25 @@ declare const MigrationSchema: z.ZodObject<{
     timestamp: z.ZodString;
     status: z.ZodEnum<["applied", "pending", "failed"]>;
     sqlPath: z.ZodString;
+    createdAt: z.ZodOptional<z.ZodString>;
+    appliedAt: z.ZodOptional<z.ZodString>;
+    durationMs: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
     name: string;
     timestamp: string;
     status: "applied" | "pending" | "failed";
     sqlPath: string;
+    createdAt?: string | undefined;
+    appliedAt?: string | undefined;
+    durationMs?: number | undefined;
 }, {
     name: string;
     timestamp: string;
     status: "applied" | "pending" | "failed";
     sqlPath: string;
+    createdAt?: string | undefined;
+    appliedAt?: string | undefined;
+    durationMs?: number | undefined;
 }>;
 declare const RiskFactorSchema: z.ZodObject<{
     pattern: z.ZodString;
@@ -428,6 +458,9 @@ declare const MigrationDetailSchema: z.ZodObject<{
     timestamp: z.ZodString;
     status: z.ZodEnum<["applied", "pending", "failed"]>;
     sqlPath: z.ZodString;
+    createdAt: z.ZodOptional<z.ZodString>;
+    appliedAt: z.ZodOptional<z.ZodString>;
+    durationMs: z.ZodOptional<z.ZodNumber>;
 } & {
     sql: z.ZodString;
     risks: z.ZodArray<z.ZodString, "many">;
@@ -506,6 +539,9 @@ declare const MigrationDetailSchema: z.ZodObject<{
     sqlPath: string;
     sql: string;
     risks: string[];
+    createdAt?: string | undefined;
+    appliedAt?: string | undefined;
+    durationMs?: number | undefined;
     riskScore?: {
         score: number;
         level: "low" | "medium" | "high" | "critical";
@@ -533,6 +569,9 @@ declare const MigrationDetailSchema: z.ZodObject<{
     sqlPath: string;
     sql: string;
     risks: string[];
+    createdAt?: string | undefined;
+    appliedAt?: string | undefined;
+    durationMs?: number | undefined;
     riskScore?: {
         score: number;
         level: "low" | "medium" | "high" | "critical";
@@ -609,6 +648,63 @@ declare const DriftResultSchema: z.ZodObject<{
     cachedAt: string | null;
     errorMessage?: string | undefined;
 }>;
+declare const DeploymentReadinessCheckSchema: z.ZodObject<{
+    id: z.ZodEnum<["database", "drift", "failed-migrations", "pending-migrations", "critical-risks"]>;
+    label: z.ZodString;
+    passed: z.ZodBoolean;
+    message: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    message: string;
+    id: "database" | "drift" | "failed-migrations" | "pending-migrations" | "critical-risks";
+    label: string;
+    passed: boolean;
+}, {
+    message: string;
+    id: "database" | "drift" | "failed-migrations" | "pending-migrations" | "critical-risks";
+    label: string;
+    passed: boolean;
+}>;
+declare const DeploymentReadinessSchema: z.ZodObject<{
+    status: z.ZodEnum<["ready", "attention", "blocked"]>;
+    score: z.ZodNumber;
+    summary: z.ZodString;
+    checks: z.ZodArray<z.ZodObject<{
+        id: z.ZodEnum<["database", "drift", "failed-migrations", "pending-migrations", "critical-risks"]>;
+        label: z.ZodString;
+        passed: z.ZodBoolean;
+        message: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        message: string;
+        id: "database" | "drift" | "failed-migrations" | "pending-migrations" | "critical-risks";
+        label: string;
+        passed: boolean;
+    }, {
+        message: string;
+        id: "database" | "drift" | "failed-migrations" | "pending-migrations" | "critical-risks";
+        label: string;
+        passed: boolean;
+    }>, "many">;
+}, "strip", z.ZodTypeAny, {
+    status: "ready" | "attention" | "blocked";
+    score: number;
+    summary: string;
+    checks: {
+        message: string;
+        id: "database" | "drift" | "failed-migrations" | "pending-migrations" | "critical-risks";
+        label: string;
+        passed: boolean;
+    }[];
+}, {
+    status: "ready" | "attention" | "blocked";
+    score: number;
+    summary: string;
+    checks: {
+        message: string;
+        id: "database" | "drift" | "failed-migrations" | "pending-migrations" | "critical-risks";
+        label: string;
+        passed: boolean;
+    }[];
+}>;
 declare const ProjectStatusSchema: z.ZodObject<{
     connected: z.ZodBoolean;
     migrationsApplied: z.ZodNumber;
@@ -617,10 +713,56 @@ declare const ProjectStatusSchema: z.ZodObject<{
     driftDetected: z.ZodBoolean;
     driftCount: z.ZodNumber;
     riskLevel: z.ZodEnum<["low", "medium", "high", "critical"]>;
+    healthScore: z.ZodNumber;
+    deploymentReadiness: z.ZodObject<{
+        status: z.ZodEnum<["ready", "attention", "blocked"]>;
+        score: z.ZodNumber;
+        summary: z.ZodString;
+        checks: z.ZodArray<z.ZodObject<{
+            id: z.ZodEnum<["database", "drift", "failed-migrations", "pending-migrations", "critical-risks"]>;
+            label: z.ZodString;
+            passed: z.ZodBoolean;
+            message: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            message: string;
+            id: "database" | "drift" | "failed-migrations" | "pending-migrations" | "critical-risks";
+            label: string;
+            passed: boolean;
+        }, {
+            message: string;
+            id: "database" | "drift" | "failed-migrations" | "pending-migrations" | "critical-risks";
+            label: string;
+            passed: boolean;
+        }>, "many">;
+    }, "strip", z.ZodTypeAny, {
+        status: "ready" | "attention" | "blocked";
+        score: number;
+        summary: string;
+        checks: {
+            message: string;
+            id: "database" | "drift" | "failed-migrations" | "pending-migrations" | "critical-risks";
+            label: string;
+            passed: boolean;
+        }[];
+    }, {
+        status: "ready" | "attention" | "blocked";
+        score: number;
+        summary: string;
+        checks: {
+            message: string;
+            id: "database" | "drift" | "failed-migrations" | "pending-migrations" | "critical-risks";
+            label: string;
+            passed: boolean;
+        }[];
+    }>;
     lastSync: z.ZodString;
     provider: z.ZodOptional<z.ZodEnum<["postgresql", "mysql", "sqlite", "sqlserver", "mongodb"]>>;
     projectName: z.ZodOptional<z.ZodString>;
     schemaPath: z.ZodOptional<z.ZodString>;
+    migrationsPath: z.ZodOptional<z.ZodString>;
+    prismaVersion: z.ZodOptional<z.ZodString>;
+    packageManager: z.ZodOptional<z.ZodString>;
+    hasDatabaseUrl: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
     driftCount: number;
     connected: boolean;
@@ -629,10 +771,26 @@ declare const ProjectStatusSchema: z.ZodObject<{
     migrationsFailed: number;
     driftDetected: boolean;
     riskLevel: "low" | "medium" | "high" | "critical";
+    healthScore: number;
+    deploymentReadiness: {
+        status: "ready" | "attention" | "blocked";
+        score: number;
+        summary: string;
+        checks: {
+            message: string;
+            id: "database" | "drift" | "failed-migrations" | "pending-migrations" | "critical-risks";
+            label: string;
+            passed: boolean;
+        }[];
+    };
     lastSync: string;
     provider?: "postgresql" | "mysql" | "sqlite" | "sqlserver" | "mongodb" | undefined;
     projectName?: string | undefined;
     schemaPath?: string | undefined;
+    migrationsPath?: string | undefined;
+    prismaVersion?: string | undefined;
+    packageManager?: string | undefined;
+    hasDatabaseUrl?: boolean | undefined;
 }, {
     driftCount: number;
     connected: boolean;
@@ -641,10 +799,26 @@ declare const ProjectStatusSchema: z.ZodObject<{
     migrationsFailed: number;
     driftDetected: boolean;
     riskLevel: "low" | "medium" | "high" | "critical";
+    healthScore: number;
+    deploymentReadiness: {
+        status: "ready" | "attention" | "blocked";
+        score: number;
+        summary: string;
+        checks: {
+            message: string;
+            id: "database" | "drift" | "failed-migrations" | "pending-migrations" | "critical-risks";
+            label: string;
+            passed: boolean;
+        }[];
+    };
     lastSync: string;
     provider?: "postgresql" | "mysql" | "sqlite" | "sqlserver" | "mongodb" | undefined;
     projectName?: string | undefined;
     schemaPath?: string | undefined;
+    migrationsPath?: string | undefined;
+    prismaVersion?: string | undefined;
+    packageManager?: string | undefined;
+    hasDatabaseUrl?: boolean | undefined;
 }>;
 declare const SimulationStatementSchema: z.ZodObject<{
     sql: z.ZodString;
@@ -653,13 +827,13 @@ declare const SimulationStatementSchema: z.ZodObject<{
     durationMs: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
     success: boolean;
-    sql: string;
     durationMs: number;
+    sql: string;
     error?: string | undefined;
 }, {
     success: boolean;
-    sql: string;
     durationMs: number;
+    sql: string;
     error?: string | undefined;
 }>;
 declare const SimulationResultSchema: z.ZodObject<{
@@ -672,13 +846,13 @@ declare const SimulationResultSchema: z.ZodObject<{
         durationMs: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
         success: boolean;
-        sql: string;
         durationMs: number;
+        sql: string;
         error?: string | undefined;
     }, {
         success: boolean;
-        sql: string;
         durationMs: number;
+        sql: string;
         error?: string | undefined;
     }>, "many">;
     errors: z.ZodArray<z.ZodString, "many">;
@@ -690,8 +864,8 @@ declare const SimulationResultSchema: z.ZodObject<{
     warnings: string[];
     appliedStatements: {
         success: boolean;
-        sql: string;
         durationMs: number;
+        sql: string;
         error?: string | undefined;
     }[];
     errors: string[];
@@ -702,8 +876,8 @@ declare const SimulationResultSchema: z.ZodObject<{
     warnings: string[];
     appliedStatements: {
         success: boolean;
-        sql: string;
         durationMs: number;
+        sql: string;
         error?: string | undefined;
     }[];
     errors: string[];
@@ -1081,14 +1255,14 @@ declare const OrganizationSchema: z.ZodObject<{
     createdAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     name: string;
+    createdAt: string;
     id: string;
     slug: string;
-    createdAt: string;
 }, {
     name: string;
+    createdAt: string;
     id: string;
     slug: string;
-    createdAt: string;
 }>;
 declare const TeamSchema: z.ZodObject<{
     id: z.ZodString;
@@ -1097,13 +1271,13 @@ declare const TeamSchema: z.ZodObject<{
     createdAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     name: string;
-    id: string;
     createdAt: string;
+    id: string;
     organizationId: string;
 }, {
     name: string;
-    id: string;
     createdAt: string;
+    id: string;
     organizationId: string;
 }>;
 declare const ProjectSchema: z.ZodObject<{
@@ -1115,15 +1289,15 @@ declare const ProjectSchema: z.ZodObject<{
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     name: string;
-    id: string;
     createdAt: string;
+    id: string;
     organizationId: string;
     updatedAt: string;
     teamId?: string | undefined;
 }, {
     name: string;
-    id: string;
     createdAt: string;
+    id: string;
     organizationId: string;
     updatedAt: string;
     teamId?: string | undefined;
@@ -1138,17 +1312,17 @@ declare const EnvironmentSchema: z.ZodObject<{
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     name: string;
-    provider: "postgresql" | "mysql" | "sqlite" | "sqlserver" | "mongodb";
-    id: string;
     createdAt: string;
+    id: string;
+    provider: "postgresql" | "mysql" | "sqlite" | "sqlserver" | "mongodb";
     updatedAt: string;
     projectId: string;
     connectionString?: string | undefined;
 }, {
     name: string;
-    provider: "postgresql" | "mysql" | "sqlite" | "sqlserver" | "mongodb";
-    id: string;
     createdAt: string;
+    id: string;
+    provider: "postgresql" | "mysql" | "sqlite" | "sqlserver" | "mongodb";
     updatedAt: string;
     projectId: string;
     connectionString?: string | undefined;
@@ -1165,20 +1339,20 @@ declare const DeploymentEventSchema: z.ZodObject<{
     createdAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     success: boolean;
-    migrationsApplied: string[];
+    createdAt: string;
     durationMs: number;
     id: string;
-    createdAt: string;
+    migrationsApplied: string[];
     projectId: string;
     environmentId: string;
     error?: string | undefined;
     appliedBy?: string | undefined;
 }, {
     success: boolean;
-    migrationsApplied: string[];
+    createdAt: string;
     durationMs: number;
     id: string;
-    createdAt: string;
+    migrationsApplied: string[];
     projectId: string;
     environmentId: string;
     error?: string | undefined;
@@ -1227,4 +1401,4 @@ declare class DriftRepairError extends PrismaFlowError {
     constructor(detail: string, cause?: unknown);
 }
 
-export { type ApiError, type ApiResponse, type ApiSuccess, type AuditAction, type AuditEntry, ConfigurationError, DatabaseConnectionError, type DatabaseProvider, DatabaseProviderSchema, type DeploymentEvent, DeploymentEventSchema, DriftDetectionError, type DriftDetectionStatus, DriftDetectionStatusSchema, type DriftItem, DriftItemSchema, type DriftRecoverySuggestion, DriftRecoverySuggestionSchema, DriftRepairError, type DriftRepairStrategy, DriftRepairStrategySchema, type DriftResult, DriftResultSchema, type DriftType, DriftTypeSchema, type Environment, type EnvironmentComparison, EnvironmentComparisonError, EnvironmentComparisonSchema, type EnvironmentEntry, EnvironmentEntrySchema, EnvironmentSchema, type FeatureFlags, FeatureFlagsSchema, FeatureGatedError, GitAwarenessError, type GitMigrationInfo, GitMigrationInfoSchema, type LogLevel, LogLevelSchema, type Migration, MigrationAnalysisError, type MigrationConflict, MigrationConflictSchema, type MigrationDetail, MigrationDetailSchema, type MigrationHistoryDiff, MigrationHistoryDiffSchema, type MigrationRiskScore, MigrationRiskScoreSchema, MigrationSchema, type MigrationStatus, MigrationStatusSchema, type Organization, OrganizationSchema, type PaginatedResponse, type PaginationMeta, PaginationQuerySchema, type PrismaFlowConfig, type PrismaFlowConfigParsed, PrismaFlowConfigSchema, PrismaFlowError, type Project, ProjectSchema, type ProjectStatus, ProjectStatusSchema, type RiskFactor, RiskFactorSchema, type RiskLevel, RiskLevelSchema, RollbackError, type RollbackPlan, RollbackPlanSchema, type RollbackStep, type SSEEvent, type SSEEventType, type SchemaDiff, SchemaDiffSchema, type SchemaDiffType, SchemaDiffTypeSchema, SchemaNotFoundError, SimulationError, type SimulationMode, type SimulationResult, SimulationResultSchema, type SimulationStatement, SimulationStatementSchema, type Team, TeamSchema, UnauthorizedError, type WebhookConfig, WebhookConfigSchema, type WebhookEvent, WebhookEventSchema, type WebhookType, WebhookTypeSchema };
+export { type ApiError, type ApiResponse, type ApiSuccess, type AuditAction, type AuditEntry, ConfigurationError, DatabaseConnectionError, type DatabaseProvider, DatabaseProviderSchema, type DeploymentEvent, DeploymentEventSchema, type DeploymentReadiness, type DeploymentReadinessCheck, DeploymentReadinessCheckSchema, DeploymentReadinessSchema, type DeploymentReadinessStatus, DriftDetectionError, type DriftDetectionStatus, DriftDetectionStatusSchema, type DriftItem, DriftItemSchema, type DriftRecoverySuggestion, DriftRecoverySuggestionSchema, DriftRepairError, type DriftRepairStrategy, DriftRepairStrategySchema, type DriftResult, DriftResultSchema, type DriftType, DriftTypeSchema, type Environment, type EnvironmentComparison, EnvironmentComparisonError, EnvironmentComparisonSchema, type EnvironmentEntry, EnvironmentEntrySchema, EnvironmentSchema, type FeatureFlags, FeatureFlagsSchema, FeatureGatedError, GitAwarenessError, type GitMigrationInfo, GitMigrationInfoSchema, type LogLevel, LogLevelSchema, type Migration, MigrationAnalysisError, type MigrationConflict, MigrationConflictSchema, type MigrationDetail, MigrationDetailSchema, type MigrationHistoryDiff, MigrationHistoryDiffSchema, type MigrationRiskScore, MigrationRiskScoreSchema, MigrationSchema, type MigrationStatus, MigrationStatusSchema, type Organization, OrganizationSchema, type PaginatedResponse, type PaginationMeta, PaginationQuerySchema, type PrismaFlowConfig, type PrismaFlowConfigParsed, PrismaFlowConfigSchema, PrismaFlowError, type Project, ProjectSchema, type ProjectStatus, ProjectStatusSchema, type RiskFactor, RiskFactorSchema, type RiskLevel, RiskLevelSchema, RollbackError, type RollbackPlan, RollbackPlanSchema, type RollbackStep, type SSEEvent, type SSEEventType, type SchemaDiff, SchemaDiffSchema, type SchemaDiffType, SchemaDiffTypeSchema, SchemaNotFoundError, SimulationError, type SimulationMode, type SimulationResult, SimulationResultSchema, type SimulationStatement, SimulationStatementSchema, type Team, TeamSchema, UnauthorizedError, type WebhookConfig, WebhookConfigSchema, type WebhookEvent, WebhookEventSchema, type WebhookType, WebhookTypeSchema };

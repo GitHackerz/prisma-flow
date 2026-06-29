@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import { AlertCircle, CheckCircle2, RefreshCw, XCircle } from 'lucide-react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Toaster } from 'sonner'
 import useSWR from 'swr'
@@ -9,12 +9,16 @@ import { DriftAlert } from './components/DriftAlert'
 import { HealthCheck } from './components/HealthCheck'
 import { MigrationList } from './components/MigrationList'
 import { MigrationTimeline } from './components/MigrationTimeline'
+import { NextActions } from './components/NextActions'
 import { StatusCards } from './components/StatusCards'
 
 function ErrorFallback({
   error,
   resetErrorBoundary,
-}: { error: Error; resetErrorBoundary: () => void }) {
+}: {
+  error: Error
+  resetErrorBoundary: () => void
+}) {
   return (
     <div className="flex flex-col items-center justify-center h-screen gap-4 text-center px-4">
       <AlertCircle className="h-12 w-12 text-destructive" />
@@ -92,6 +96,77 @@ export default function Dashboard() {
         {status?.driftDetected && <DriftAlert />}
 
         {status && <StatusCards status={status} />}
+
+        {status && (
+          <section className="mt-8 rounded-xl border bg-card p-6 shadow">
+            <h2 className="text-lg font-semibold">Detected Project</h2>
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-lg border p-3">
+                <p className="text-xs font-medium uppercase text-muted-foreground">Provider</p>
+                <p className="mt-1 font-mono text-sm">{status.provider ?? 'unknown'}</p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-xs font-medium uppercase text-muted-foreground">Prisma</p>
+                <p className="mt-1 font-mono text-sm">{status.prismaVersion ?? 'not found'}</p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-xs font-medium uppercase text-muted-foreground">Package</p>
+                <p className="mt-1 font-mono text-sm">{status.packageManager ?? 'unknown'}</p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-xs font-medium uppercase text-muted-foreground">Database URL</p>
+                <p className="mt-1 font-mono text-sm">
+                  {status.hasDatabaseUrl ? 'detected' : 'not detected'}
+                </p>
+              </div>
+            </div>
+            <p className="mt-3 truncate font-mono text-xs text-muted-foreground">
+              Schema: {status.schemaPath ?? 'not detected'}
+            </p>
+          </section>
+        )}
+
+        {status && (
+          <section className="mt-8 rounded-xl border bg-card p-6 shadow">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="text-lg font-semibold">Deployment Readiness</h2>
+                <p className="text-sm text-muted-foreground">
+                  {status.deploymentReadiness.summary} with a score of{' '}
+                  {status.deploymentReadiness.score}/100.
+                </p>
+              </div>
+              <span
+                className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
+                  status.deploymentReadiness.status === 'ready'
+                    ? 'bg-emerald-500/10 text-emerald-600'
+                    : status.deploymentReadiness.status === 'attention'
+                      ? 'bg-yellow-500/10 text-yellow-600'
+                      : 'bg-destructive/10 text-destructive'
+                }`}
+              >
+                {status.deploymentReadiness.status}
+              </span>
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {status.deploymentReadiness.checks.map((check) => (
+                <div key={check.id} className="flex items-start gap-3 rounded-lg border p-3">
+                  {check.passed ? (
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                  ) : (
+                    <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium">{check.label}</p>
+                    <p className="text-xs text-muted-foreground">{check.message}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {status && <NextActions status={status} />}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
           <MigrationTimeline

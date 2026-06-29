@@ -23,16 +23,31 @@ const execAsync = promisify(execFile)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DESTRUCTIVE_PATTERNS: Array<{ pattern: RegExp; warning: string }> = [
-  { pattern: /drop\s+table/i, warning: 'Drops a table — all data will be lost' },
-  { pattern: /truncate\s+table/i, warning: 'Truncates a table — all rows will be deleted' },
-  { pattern: /drop\s+column/i, warning: 'Drops a column — data in that column will be lost' },
+  {
+    pattern: /drop\s+table/i,
+    warning: 'Drops a table — all data will be lost',
+  },
+  {
+    pattern: /truncate\s+table/i,
+    warning: 'Truncates a table — all rows will be deleted',
+  },
+  {
+    pattern: /drop\s+column/i,
+    warning: 'Drops a column — data in that column will be lost',
+  },
   {
     pattern: /alter\s+column.*not\s+null/i,
     warning: 'Adds NOT NULL — will fail if existing rows have NULLs',
   },
   { pattern: /delete\s+from/i, warning: 'Deletes rows — data will be lost' },
-  { pattern: /drop\s+index/i, warning: 'Drops an index — query performance may degrade' },
-  { pattern: /drop\s+constraint/i, warning: 'Drops a constraint — data integrity may be affected' },
+  {
+    pattern: /drop\s+index/i,
+    warning: 'Drops an index — query performance may degrade',
+  },
+  {
+    pattern: /drop\s+constraint/i,
+    warning: 'Drops a constraint — data integrity may be affected',
+  },
 ]
 
 const DDL_TYPES: Array<{ pattern: RegExp; type: SimulationStatement['type'] }> = [
@@ -146,7 +161,7 @@ export async function simulateSqlite(
         mode: 'shadow',
       }
     }
-  } catch (err: unknown) {
+  } catch {
     // Fallback to static
     const sql = await fs.readFile(sqlFilePath, 'utf-8').catch(() => '')
     return analyseStatically(migrationName, splitStatements(sql))

@@ -33,11 +33,13 @@ export function statusCommand() {
         } else {
           const bar = chalk.dim('━'.repeat(50))
           const riskColor =
-            status.riskLevel === 'high'
+            status.riskLevel === 'critical'
               ? chalk.red
-              : status.riskLevel === 'medium'
-                ? chalk.yellow
-                : chalk.green
+              : status.riskLevel === 'high'
+                ? chalk.red
+                : status.riskLevel === 'medium'
+                  ? chalk.yellow
+                  : chalk.green
 
           if (!options.quiet) console.log()
           console.log(chalk.bold.cyan(' 📊  PrismaFlow Status'))
@@ -75,6 +77,11 @@ export function statusCommand() {
           console.log(
             chalk.bold(' Risk Level:   ') + riskColor(chalk.bold(status.riskLevel.toUpperCase())),
           )
+          console.log(
+            chalk.bold(' Health Score: ') +
+              riskColor(chalk.bold(`${status.healthScore}/100`)) +
+              chalk.dim(` (${status.deploymentReadiness.summary})`),
+          )
 
           // Show last migration
           const lastMigration = migrations.filter((m) => m.status === 'applied').pop()
@@ -101,7 +108,14 @@ export function statusCommand() {
             console.log(chalk.red(' ✖  Failed migrations — run: prisma migrate resolve'))
           }
           if (status.driftDetected) {
-            console.log(chalk.red(' ✖  Schema drift — run: prisma-flow repair'))
+            console.log(chalk.red(' ✖  Schema drift — review the dashboard Drift page'))
+          }
+          if (status.deploymentReadiness.status === 'ready') {
+            console.log(chalk.green(' ✔  Deployment readiness checks passed'))
+          } else {
+            for (const check of status.deploymentReadiness.checks.filter((item) => !item.passed)) {
+              console.log(chalk.yellow(` ⚠  ${check.label}: ${check.message}`))
+            }
           }
           if (!options.quiet) console.log()
         }
@@ -124,7 +138,9 @@ export function statusCommand() {
         } else {
           console.error(chalk.red(`✖  Error: ${message}`))
         }
-        await writeAuditEntry(cwd, 'status.check', 'failure', { error: message }).catch(() => {})
+        await writeAuditEntry(cwd, 'status.check', 'failure', {
+          error: message,
+        }).catch(() => {})
         process.exit(1)
       }
     })

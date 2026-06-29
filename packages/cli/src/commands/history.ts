@@ -108,7 +108,9 @@ export function historyCommand() {
         console.log()
 
         await Promise.all([
-          writeAuditEntry(cwd, 'migration.history', 'success', { count: migrations.length }),
+          writeAuditEntry(cwd, 'migration.history', 'success', {
+            count: migrations.length,
+          }),
           trackEvent('history', migrations.length),
         ]).catch(() => {})
 

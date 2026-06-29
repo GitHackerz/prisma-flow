@@ -9,28 +9,51 @@ import type {
   ApiSuccess,
   DriftItem,
   DriftResult,
-  EnvironmentComparison,
   Migration,
   MigrationDetail,
   MigrationRiskScore,
   PaginatedResponse,
   ProjectStatus,
-  RollbackPlan,
-  SchemaDiff,
   SimulationResult,
 } from '@prisma-flow/shared'
+
+export interface SchemaField {
+  name: string
+  type: string
+  kind: 'scalar' | 'object' | 'enum' | 'unsupported'
+  isRequired: boolean
+  isList: boolean
+  isId?: boolean
+  isUnique?: boolean
+  relationName?: string
+}
+
+export interface SchemaModel {
+  name: string
+  fields: SchemaField[]
+  primaryKey?: { fields: string[] } | null
+  uniqueIndexes?: Array<{ fields: string[] }>
+  indexes?: Array<{ fields: string[] }>
+}
+
+export interface SchemaEnum {
+  name: string
+  values: Array<{ name: string }>
+}
+
+export interface SchemaDatamodel {
+  models: SchemaModel[]
+  enums: SchemaEnum[]
+}
 
 // Re-export types so components can import from this single module
 export type {
   DriftItem,
   DriftResult,
-  EnvironmentComparison,
   Migration,
   MigrationDetail,
   MigrationRiskScore,
   ProjectStatus,
-  RollbackPlan,
-  SchemaDiff,
   SimulationResult,
 }
 
@@ -101,8 +124,15 @@ export async function fetchDrift(): Promise<DriftResult> {
   return body.data
 }
 
+export async function fetchSchema(): Promise<SchemaDatamodel> {
+  const body = await request<ApiSuccess<SchemaDatamodel>>('/api/schema')
+  return body.data
+}
+
 export async function forceDriftCheck(): Promise<DriftResult> {
-  const body = await request<ApiSuccess<DriftResult>>('/api/drift/check', { method: 'POST' })
+  const body = await request<ApiSuccess<DriftResult>>('/api/drift/check', {
+    method: 'POST',
+  })
   return body.data
 }
 
@@ -111,22 +141,14 @@ export async function fetchRisks(): Promise<
 > {
   const body =
     await request<
-      ApiSuccess<Array<{ name: string; timestamp: string; riskScore: MigrationRiskScore }>>
+      ApiSuccess<
+        Array<{
+          name: string
+          timestamp: string
+          riskScore: MigrationRiskScore
+        }>
+      >
     >('/api/risks')
-  return body.data
-}
-
-export async function fetchRisk(migration: string): Promise<MigrationRiskScore> {
-  const body = await request<ApiSuccess<MigrationRiskScore>>(
-    `/api/risks/${encodeURIComponent(migration)}`,
-  )
-  return body.data
-}
-
-export async function fetchRollbackPlan(migration: string): Promise<RollbackPlan> {
-  const body = await request<ApiSuccess<RollbackPlan>>(
-    `/api/rollback/${encodeURIComponent(migration)}`,
-  )
   return body.data
 }
 
@@ -137,59 +159,12 @@ export async function fetchSimulation(migration: string): Promise<SimulationResu
   return body.data
 }
 
-export async function fetchDiff(
-  breakingOnly = false,
-): Promise<{ diffs: SchemaDiff[]; totalDiffs: number; breakingDiffs: number }> {
-  const body = await request<
-    ApiSuccess<{ diffs: SchemaDiff[]; totalDiffs: number; breakingDiffs: number }>
-  >(`/api/diff${breakingOnly ? '?breaking=true' : ''}`)
-  return body.data
-}
-
-export async function fetchRepairSuggestions() {
-  const body =
-    await request<ApiSuccess<{ drifted: boolean; suggestions: unknown[] }>>('/api/repair')
-  return body.data
-}
-
-export async function applyRepairs() {
-  const body = await request<
-    ApiSuccess<Array<{ migrationName: string; success: boolean; error?: string }>>
-  >('/api/repair/apply', { method: 'POST' })
-  return body.data
-}
-
-export async function fetchComparison(): Promise<EnvironmentComparison> {
-  const body = await request<ApiSuccess<EnvironmentComparison>>('/api/compare')
-  return body.data
-}
-
-export async function fetchAuditLog(limit = 100): Promise<unknown[]> {
-  const body = await request<ApiSuccess<unknown[]>>(`/api/audit?limit=${limit}`)
-  return body.data
-}
-
-export async function fetchGitInfo() {
-  const body = await request<ApiSuccess<unknown>>('/api/git')
-  return body.data
-}
-
-export async function fetchConfig() {
-  const body = await request<ApiSuccess<unknown>>('/api/config')
-  return body.data
-}
-
 // ─── SWR keys (stable, serialisable) ─────────────────────────────────────────
 
 export const SWR_KEYS = {
   status: '/api/status',
   migrations: (page: number, limit: number) => `/api/migrations?page=${page}&limit=${limit}`,
   drift: '/api/drift',
+  schema: '/api/schema',
   risks: '/api/risks',
-  diff: '/api/diff',
-  repair: '/api/repair',
-  compare: '/api/compare',
-  audit: '/api/audit',
-  git: '/api/git',
-  config: '/api/config',
 } as const

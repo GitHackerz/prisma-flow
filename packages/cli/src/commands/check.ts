@@ -1,9 +1,7 @@
 import chalk from 'chalk'
 import { Command } from 'commander'
 import { writeAuditEntry } from '../core/audit.js'
-import { getConfig } from '../core/config-loader.js'
 import { getMigrations, getProjectStatus } from '../core/migration-analyzer.js'
-import { buildWebhooksFromEnv, notify } from '../core/notifications.js'
 import { detectPrismaProject } from '../core/prisma-detector.js'
 import { trackEvent } from '../core/telemetry.js'
 
@@ -23,11 +21,16 @@ export function checkCommand() {
     .option('--json', 'Output result as JSON to stdout')
     .option(
       '--fail-on-risk <level>',
-      'Exit code 5 when risk meets or exceeds this level (low|medium|high)',
+      'Exit code 5 when risk meets or exceeds this level (low|medium|high|critical)',
     )
     .option('--quiet', 'Suppress non-essential output')
     .action(
-      async (options: { ci?: boolean; json?: boolean; failOnRisk?: string; quiet?: boolean }) => {
+      async (options: {
+        ci?: boolean
+        json?: boolean
+        failOnRisk?: string
+        quiet?: boolean
+      }) => {
         const cwd = process.cwd()
 
         try {
@@ -45,10 +48,9 @@ export function checkCommand() {
             process.exit(4)
           }
 
-          const [status, migrations, config] = await Promise.all([
+          const [status, migrations] = await Promise.all([
             getProjectStatus(cwd),
             getMigrations(cwd),
-            getConfig(cwd),
           ])
 
           const ok =
@@ -62,6 +64,8 @@ export function checkCommand() {
             driftDetected: status.driftDetected,
             driftCount: status.driftCount,
             riskLevel: status.riskLevel,
+            healthScore: status.healthScore,
+            deploymentReadiness: status.deploymentReadiness,
             lastSync: status.lastSync,
             provider: status.provider,
           }
@@ -87,14 +91,14 @@ export function checkCommand() {
 
             // Applied migrations
             console.log(
-              chalk.green(` ✔  Applied migrations: `) +
+              chalk.green(' ✔  Applied migrations: ') +
                 chalk.bold(String(status.migrationsApplied)),
             )
 
             // Pending migrations
             if (status.migrationsPending > 0) {
               console.log(
-                chalk.yellow(` ⚠  Pending migrations: `) +
+                chalk.yellow(' ⚠  Pending migrations: ') +
                   chalk.bold.yellow(String(status.migrationsPending)),
               )
               const pendingMigrations = migrations.filter((m) => m.status === 'pending').slice(0, 3)
@@ -111,7 +115,7 @@ export function checkCommand() {
             // Failed migrations
             if (status.migrationsFailed > 0) {
               console.log(
-                chalk.red(` ✖  Failed migrations: `) +
+                chalk.red(' ✖  Failed migrations: ') +
                   chalk.bold.red(String(status.migrationsFailed)),
               )
               const failedMigrations = migrations.filter((m) => m.status === 'failed').slice(0, 3)
@@ -125,12 +129,12 @@ export function checkCommand() {
             // Drift
             if (status.driftDetected) {
               console.log(
-                chalk.red(` ✖  Schema drift detected: `) +
+                chalk.red(' ✖  Schema drift detected: ') +
                   chalk.bold.red(
                     `${status.driftCount} difference${status.driftCount !== 1 ? 's' : ''}`,
                   ),
               )
-              console.log(chalk.dim('     Run: prisma-flow repair to generate a fix'))
+              console.log(chalk.dim('     Review the dashboard Drift page before deploying'))
             } else {
               console.log(chalk.green(' ✔  No schema drift detected'))
             }
@@ -140,9 +144,15 @@ export function checkCommand() {
               low: chalk.green,
               medium: chalk.yellow,
               high: chalk.red,
+              critical: chalk.red,
             }
             const riskColor = riskColors[status.riskLevel] ?? chalk.white
-            console.log(` 🔒  Risk level: ` + riskColor(chalk.bold(status.riskLevel.toUpperCase())))
+            console.log(` 🔒  Risk level: ${riskColor(chalk.bold(status.riskLevel.toUpperCase()))}`)
+            console.log(
+              ` 🚦  Readiness: ${riskColor(chalk.bold(`${status.healthScore}/100`))}${chalk.dim(
+                ` — ${status.deploymentReadiness.summary}`,
+              )}`,
+            )
 
             // Risk factors from highest-scored migration
             const highestRiskMigration = migrations
@@ -162,7 +172,7 @@ export function checkCommand() {
             if (ok) {
               console.log(chalk.bold.green(' ✔  All checks passed'))
             } else {
-              console.log(chalk.bold.red(` ✖  Issues detected — review above`))
+              console.log(chalk.bold.red(' ✖  Issues detected — review above'))
               if (status.migrationsFailed > 0) {
                 console.log(chalk.dim('     → Fix: Run prisma migrate resolve'))
               }
@@ -170,13 +180,15 @@ export function checkCommand() {
                 console.log(chalk.dim('     → Fix: Run prisma migrate deploy'))
               }
               if (status.driftDetected) {
-                console.log(chalk.dim('     → Fix: Run prisma-flow repair'))
+                console.log(
+                  chalk.dim('     → Fix: Review drift details and reconcile Prisma schema'),
+                )
               }
             }
             console.log()
           }
 
-          // ── Audit & telemetry (non-blocking) ──────────────────────────────
+          // ── Local bookkeeping (non-blocking) ──────────────────────────────
           await Promise.all([
             writeAuditEntry(cwd, 'migration.check', ok ? 'success' : 'warning', {
               pendingCount: status.migrationsPending,
@@ -185,51 +197,18 @@ export function checkCommand() {
               riskLevel: status.riskLevel,
             }),
             trackEvent('check', migrations.length),
-            // Notify on check-complete via webhooks
-            (async () => {
-              const webhooks = (
-                config.webhooks.length > 0 ? config.webhooks : buildWebhooksFromEnv()
-              ) as import('@prisma-flow/shared').WebhookConfig[]
-              await notify(webhooks, {
-                event: 'check-complete',
-                message: ok ? 'All migration checks passed' : 'Migration check found issues',
-                detail: {
-                  pending: status.migrationsPending,
-                  failed: status.migrationsFailed,
-                  drift: status.driftDetected,
-                },
-              })
-            })(),
-            // Notify if drift or failed migrations (separate urgent alert)
-            (async () => {
-              if (status.driftDetected || status.migrationsFailed > 0) {
-                const webhooks = (
-                  config.webhooks.length > 0 ? config.webhooks : buildWebhooksFromEnv()
-                ) as import('@prisma-flow/shared').WebhookConfig[]
-                if (status.migrationsFailed > 0) {
-                  await notify(webhooks, {
-                    event: 'migration-failed',
-                    message: `${status.migrationsFailed} migration(s) have failed`,
-                    detail: {
-                      failed: migrations.filter((m) => m.status === 'failed').map((m) => m.name),
-                    },
-                  })
-                }
-                if (status.driftDetected) {
-                  await notify(webhooks, {
-                    event: 'drift-detected',
-                    message: `Schema drift detected: ${status.driftCount} difference(s)`,
-                  })
-                }
-              }
-            })(),
           ]).catch(() => {
             /* background tasks — never fail the command */
           })
 
           // ── Exit codes ────────────────────────────────────────────────────
           if (options.failOnRisk) {
-            const riskOrder: Record<string, number> = { low: 1, medium: 2, high: 3 }
+            const riskOrder: Record<string, number> = {
+              low: 1,
+              medium: 2,
+              high: 3,
+              critical: 4,
+            }
             const threshold = riskOrder[options.failOnRisk] ?? 2
             const current = riskOrder[status.riskLevel] ?? 1
             if (current >= threshold) process.exit(5)
@@ -248,9 +227,9 @@ export function checkCommand() {
           } else if (!options.quiet) {
             console.error(chalk.red(`✖ Error: ${message}`))
           }
-          await writeAuditEntry(cwd, 'migration.check', 'failure', { error: message }).catch(
-            () => {},
-          )
+          await writeAuditEntry(cwd, 'migration.check', 'failure', {
+            error: message,
+          }).catch(() => {})
           process.exit(4)
         }
       },

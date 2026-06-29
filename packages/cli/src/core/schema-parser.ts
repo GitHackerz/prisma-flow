@@ -4,7 +4,9 @@ import { logger } from '../logger.js'
 // from the functionality the package provides.
 import { detectPrismaProject } from './prisma-detector.js'
 
-type GetDMMFFn = (options: { datamodel: string }) => Promise<{ datamodel: unknown }>
+type GetDMMFFn = (options: {
+  datamodel: string
+}) => Promise<{ datamodel: unknown }>
 
 async function loadGetDMMF(): Promise<GetDMMFFn> {
   const mod = await import('@prisma/internals')

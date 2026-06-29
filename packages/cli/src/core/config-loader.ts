@@ -60,7 +60,10 @@ function applyEnvOverrides(config: PrismaFlowConfigParsed): PrismaFlowConfigPars
       envWebhooks.push({ type: 'slack', url: process.env.SLACK_WEBHOOK_URL })
     }
     if (process.env.DISCORD_WEBHOOK_URL) {
-      envWebhooks.push({ type: 'discord', url: process.env.DISCORD_WEBHOOK_URL })
+      envWebhooks.push({
+        type: 'discord',
+        url: process.env.DISCORD_WEBHOOK_URL,
+      })
     }
     // Merge — don't replace webhooks from config file
     overrides.webhooks = [...config.webhooks, ...envWebhooks]

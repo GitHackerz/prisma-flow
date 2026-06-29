@@ -1,7 +1,36 @@
-node_modules
-.DS_Store
+# Dependencies
+node_modules/
+
+# Environment and secrets
 .env
-npm-debug.log
-.idea
-.vscode
-.turbo
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Build outputs
+dist/
+out/
+.next/
+coverage/
+.turbo/
+packages/cli/public/
+
+# Logs and temporary files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS and editor state
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local PrismaFlow state
+.prismaflow/
+test-project/.prismaflow/

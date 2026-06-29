@@ -142,7 +142,7 @@ export class JsonlStore implements StoreAdapter {
     const updated = all.map((r) =>
       r.id === id ? { ...r, resolvedAt: new Date().toISOString() } : r,
     )
-    await fs.writeFile(filePath, updated.map((r) => JSON.stringify(r)).join('\n') + '\n', 'utf-8')
+    await fs.writeFile(filePath, `${updated.map((r) => JSON.stringify(r)).join('\n')}\n`, 'utf-8')
   }
 
   async getOpenDrift(projectPath: string): Promise<DriftRecord[]> {

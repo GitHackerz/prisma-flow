@@ -13,14 +13,11 @@
  *  - IGNORE: documented, safe to ignore
  */
 
-import { execFile } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { promisify } from 'node:util'
 import type { DriftItem, DriftRecoverySuggestion, DriftRepairStrategy } from '@prisma-flow/shared'
 import { DriftRepairError } from '@prisma-flow/shared'
-
-const execAsync = promisify(execFile)
+import { execPrisma } from './prisma-cli.js'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Suggestion generation
@@ -33,6 +30,7 @@ export function generateRepairSuggestions(
   driftItems: DriftItem[],
   migrationsDir: string,
 ): DriftRecoverySuggestion[] {
+  void migrationsDir
   const suggestions: DriftRecoverySuggestion[] = []
 
   for (const item of driftItems) {
@@ -127,7 +125,11 @@ export async function applyRepairs(
   schemaPath: string,
   cwd: string,
 ): Promise<Array<{ migrationName: string; success: boolean; error?: string }>> {
-  const results: Array<{ migrationName: string; success: boolean; error?: string }> = []
+  const results: Array<{
+    migrationName: string
+    success: boolean
+    error?: string
+  }> = []
 
   for (const suggestion of suggestions) {
     if (suggestion.strategy !== 'APPLY_MIGRATION') continue
@@ -135,15 +137,17 @@ export async function applyRepairs(
 
     const name = suggestion.driftItem.migrationName
     try {
-      await execAsync(
-        'npx',
-        ['prisma', 'migrate', 'resolve', '--applied', name, '--schema', schemaPath],
-        { cwd, timeout: 30_000 },
-      )
+      await execPrisma(cwd, ['migrate', 'resolve', '--applied', name, '--schema', schemaPath], {
+        timeout: 30_000,
+      })
       results.push({ migrationName: name, success: true })
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error(String(err))
-      results.push({ migrationName: name, success: false, error: error.message })
+      results.push({
+        migrationName: name,
+        success: false,
+        error: error.message,
+      })
     }
   }
 

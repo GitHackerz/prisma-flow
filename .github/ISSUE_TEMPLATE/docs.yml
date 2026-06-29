@@ -1,0 +1,25 @@
+name: Documentation issue
+description: Report missing, confusing, or stale documentation.
+title: "docs: "
+labels: ["documentation", "needs-triage"]
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: Link or path, for example `README.md`, `docs/DOCUMENTATION.md`, or `packages/website/app/docs/page.tsx`.
+      placeholder: README.md
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: What should change?
+      description: Describe what is missing, wrong, unclear, or outdated.
+    validations:
+      required: true
+  - type: textarea
+    id: suggested
+    attributes:
+      label: Suggested wording or structure
+      description: Optional, but helpful for small docs fixes.

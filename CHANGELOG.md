@@ -16,6 +16,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 #### Monorepo & Tooling
+
 - Turborepo task pipeline (`build`, `typecheck`, `lint`, `test`, `clean`)
 - `tsconfig.base.json` — shared strict TypeScript config across all packages
 - `.prettierrc` — consistent formatting (no semi, single quotes, trailing commas)
@@ -30,6 +31,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `docker-compose.yml` — PrismaFlow + Postgres for local dev
 
 #### CLI (`prisma-flow`)
+
 - `prisma-flow init` — generates `prismaflow.config.ts` in the target project
 - `prisma-flow doctor` — validates environment: Node version, Prisma CLI, schema, `DATABASE_URL`, migrations dir, DB reachability
 - `pino` structured logging with `PRISMAFLOW_LOG_LEVEL` env var and `pino-pretty` in dev
@@ -37,11 +39,10 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Multi-file Prisma schema support (`prisma/schema/` directory, Prisma v5.15+)
 - `driftCount` field added to `ProjectStatus`
 - Audit log — appends JSONL entries to `.prismaflow/audit.jsonl`
-- Opt-in anonymous telemetry (respects `PRISMAFLOW_TELEMETRY=off`)
-- Feature gating (free / pro / enterprise) via `PRISMAFLOW_LICENCE_KEY`
-- Webhook notifications — Slack, Discord, and generic HTTP destinations
+- Opt-in anonymous telemetry, disabled by default unless `PRISMAFLOW_TELEMETRY=on`
 
 #### API Server
+
 - Per-session random Bearer token (48 hex chars) — printed to terminal, required on all `/api/*` routes
 - CORS restricted to `localhost` and `127.0.0.1` origins only
 - `secureHeaders()` middleware (`X-Content-Type-Options`, `X-Frame-Options`, etc.)
@@ -52,6 +53,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Typed Hono context (`Variables: { projectPath, requestId }`) — no more `any`
 
 #### Dashboard
+
 - SWR v2 data fetching with auto-refresh (5 s status, 10 s migrations, 15 s drift)
 - `react-error-boundary` wrapping — connection errors shown gracefully instead of crashing
 - `sonner` toast notifications
@@ -62,6 +64,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `packages/dashboard/lib/api.ts` — typed API client with token management
 
 #### Testing & CI
+
 - Vitest v2 configured for both CLI and dashboard
 - CLI unit tests: `drift-detector.test.ts`, `migration-analyzer.test.ts`
 - CLI API integration tests: `server.test.ts` — all routes, auth guard, security headers
@@ -71,7 +74,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- **Critical — command injection**: All `execAsync(\`npx prisma ... "${userPath}"\`)` replaced with `execFileAsync('npx', [...args, schemaPath])` — no shell string interpolation
+- **Critical — command injection**: All `execAsync(\`npx prisma ... "${userPath}"\`)`replaced with`execFileAsync('npx', [...args, schemaPath])` — no shell string interpolation
 - **Drift suppressed when pending migrations exist**: `hasDrift = drift.length > 0 && pendingCount === 0` → drift is now always reported independently of pending state
 - **`getMigrationStatusMap` TODO completed**: Now correctly parses both "pending" and "failed" migration sections from `prisma migrate status` output
 - **`@ts-ignore` in `schema-parser.ts`**: Replaced with typed dynamic import and version-safe extraction of `getDMMF`
@@ -84,5 +87,5 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Authentication: was none → per-session random Bearer token on all API routes
 - Child processes: `exec` with template strings → `execFile` with explicit argument arrays
 
-[Unreleased]: https://github.com/your-org/prisma-flow/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/your-org/prisma-flow/releases/tag/v0.1.0
+[Unreleased]: https://github.com/prisma-flow/prisma-flow/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/prisma-flow/prisma-flow/releases/tag/v0.1.0

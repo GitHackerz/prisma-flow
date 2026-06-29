@@ -5,6 +5,7 @@ import { promisify } from 'node:util'
 import chalk from 'chalk'
 import { Command } from 'commander'
 import { writeAuditEntry } from '../core/audit.js'
+import { execPrisma } from '../core/prisma-cli.js'
 import { detectPrismaProject } from '../core/prisma-detector.js'
 import { trackEvent } from '../core/telemetry.js'
 
@@ -74,8 +75,7 @@ export function doctorCommand() {
           {
             label: 'prisma CLI available',
             run: async () => {
-              const { stdout } = await execFileAsync('npx', ['prisma', '--version'], {
-                cwd,
+              const { stdout } = await execPrisma(cwd, ['--version'], {
                 timeout: 15_000,
               })
               const version =
@@ -114,9 +114,15 @@ export function doctorCommand() {
               if (!project) return { ok: false, detail: 'no project' }
               try {
                 await fs.access(project.migrationsPath)
-                return { ok: true, detail: `${project.migrations.length} migration(s)` }
+                return {
+                  ok: true,
+                  detail: `${project.migrations.length} migration(s)`,
+                }
               } catch {
-                return { ok: false, detail: `${project.migrationsPath} not found` }
+                return {
+                  ok: false,
+                  detail: `${project.migrationsPath} not found`,
+                }
               }
             },
           },
@@ -150,7 +156,10 @@ export function doctorCommand() {
             label: 'git repository detected',
             run: async () => {
               try {
-                await execFileAsync('git', ['rev-parse', '--git-dir'], { cwd, timeout: 5_000 })
+                await execFileAsync('git', ['rev-parse', '--git-dir'], {
+                  cwd,
+                  timeout: 5_000,
+                })
                 const { stdout } = await execFileAsync(
                   'git',
                   ['rev-parse', '--abbrev-ref', 'HEAD'],
@@ -161,7 +170,10 @@ export function doctorCommand() {
                 )
                 return { ok: true, detail: `branch: ${stdout.trim()}` }
               } catch {
-                return { ok: false, detail: 'not a git repo — git-awareness features unavailable' }
+                return {
+                  ok: false,
+                  detail: 'not a git repo — git-awareness features unavailable',
+                }
               }
             },
           },
@@ -176,11 +188,9 @@ export function doctorCommand() {
               label: 'database reachable',
               run: async () => {
                 try {
-                  await execFileAsync(
-                    'npx',
-                    ['prisma', 'migrate', 'status', '--schema', project.schemaPath],
-                    { cwd, timeout: 20_000 },
-                  )
+                  await execPrisma(cwd, ['migrate', 'status', '--schema', project.schemaPath], {
+                    timeout: 20_000,
+                  })
                   return { ok: true, detail: 'all migrations applied' }
                 } catch (err: unknown) {
                   const error = err as { stderr?: string; stdout?: string }
@@ -191,7 +201,10 @@ export function doctorCommand() {
                     stderr.includes("Can't reach database server") ||
                     stderr.includes('Connection refused')
                   ) {
-                    return { ok: false, detail: 'database unreachable (P1001)' }
+                    return {
+                      ok: false,
+                      detail: 'database unreachable (P1001)',
+                    }
                   }
                   const pending = stdout.match(/have not yet been applied/i)
                   return {

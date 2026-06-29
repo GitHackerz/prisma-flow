@@ -37,10 +37,16 @@ app.get('/', async (c) => {
       const data = await detectDrift(projectPath)
       const entry: CacheEntry = { data, fetchedAt: Date.now() }
       cacheMap.set(projectPath, entry)
-      return c.json({ success: true, data: buildPayload(data, entry.fetchedAt) })
+      return c.json({
+        success: true,
+        data: buildPayload(data, entry.fetchedAt),
+      })
     }
 
-    return c.json({ success: true, data: buildPayload(cached.data, cached.fetchedAt) })
+    return c.json({
+      success: true,
+      data: buildPayload(cached.data, cached.fetchedAt),
+    })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     return c.json({ success: false, error: message }, 500)

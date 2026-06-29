@@ -6,16 +6,20 @@ const footerLinks = {
     { label: 'Features', href: '/#features' },
     { label: 'Installation', href: '/#installation' },
     { label: 'CLI Reference', href: '/#cli' },
-    { label: 'Pricing', href: '/#pricing' },
+    { label: 'Open Source', href: '/#open-source' },
   ],
   Resources: [
     { label: 'Documentation', href: '/docs' },
     { label: 'API Reference', href: '/docs#api-reference' },
-    { label: 'CI/CD Guide', href: '/docs#cicd-integration' },
-    { label: 'Docker', href: '/docs#docker' },
+    { label: 'CI/CD Guide', href: '/docs#reports-ci' },
+    { label: 'Reports', href: '/docs#reports-ci' },
   ],
   Community: [
-    { label: 'GitHub', href: 'https://github.com/GitHackerz/prisma-flow', external: true },
+    {
+      label: 'GitHub',
+      href: 'https://github.com/GitHackerz/prisma-flow',
+      external: true,
+    },
     {
       label: 'Contributing',
       href: 'https://github.com/GitHackerz/prisma-flow/blob/main/CONTRIBUTING.md',

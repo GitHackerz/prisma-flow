@@ -31,7 +31,10 @@ app.get('/', async (c) => {
       getUncommittedMigrations(project.migrationsPath, projectPath),
     ])
 
-    return c.json({ success: true, data: { inRepo: true, migrations, conflicts, uncommitted } })
+    return c.json({
+      success: true,
+      data: { inRepo: true, migrations, conflicts, uncommitted },
+    })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err)
     return c.json({ success: false, error: message }, 500)

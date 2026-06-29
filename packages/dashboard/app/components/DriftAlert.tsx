@@ -54,7 +54,8 @@ export function DriftAlert() {
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <h5 className="font-medium leading-none tracking-tight">
-            Schema Drift Detected ({data.driftCount} difference{data.driftCount !== 1 ? 's' : ''})
+            Schema Drift Detected ({data.driftCount} difference
+            {data.driftCount !== 1 ? 's' : ''})
           </h5>
         </div>
         <button

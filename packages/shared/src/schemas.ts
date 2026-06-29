@@ -36,6 +36,9 @@ export const MigrationSchema = z.object({
   timestamp: z.string().datetime(),
   status: MigrationStatusSchema,
   sqlPath: z.string(),
+  createdAt: z.string().datetime().optional(),
+  appliedAt: z.string().datetime().optional(),
+  durationMs: z.number().int().nonnegative().optional(),
 })
 
 export const RiskFactorSchema = z.object({
@@ -84,6 +87,20 @@ export const DriftResultSchema = z.object({
   errorMessage: z.string().optional(),
 })
 
+export const DeploymentReadinessCheckSchema = z.object({
+  id: z.enum(['database', 'drift', 'failed-migrations', 'pending-migrations', 'critical-risks']),
+  label: z.string(),
+  passed: z.boolean(),
+  message: z.string(),
+})
+
+export const DeploymentReadinessSchema = z.object({
+  status: z.enum(['ready', 'attention', 'blocked']),
+  score: z.number().int().min(0).max(100),
+  summary: z.string(),
+  checks: z.array(DeploymentReadinessCheckSchema),
+})
+
 export const ProjectStatusSchema = z.object({
   connected: z.boolean(),
   migrationsApplied: z.number().int().nonnegative(),
@@ -92,10 +109,16 @@ export const ProjectStatusSchema = z.object({
   driftDetected: z.boolean(),
   driftCount: z.number().int().nonnegative(),
   riskLevel: RiskLevelSchema,
+  healthScore: z.number().int().min(0).max(100),
+  deploymentReadiness: DeploymentReadinessSchema,
   lastSync: z.string().datetime(),
   provider: DatabaseProviderSchema.optional(),
   projectName: z.string().optional(),
   schemaPath: z.string().optional(),
+  migrationsPath: z.string().optional(),
+  prismaVersion: z.string().optional(),
+  packageManager: z.string().optional(),
+  hasDatabaseUrl: z.boolean().optional(),
 })
 
 // ─── Simulation ───────────────────────────────────────────────────────────────
@@ -198,10 +221,10 @@ export const FeatureFlagsSchema = z.object({
   riskAnalysis: z.boolean().default(true),
   webhookAlerts: z.boolean().default(false),
   auditLog: z.boolean().default(false),
-  ciAnnotations: z.boolean().default(false),
+  ciAnnotations: z.boolean().default(true),
   envComparison: z.boolean().default(false),
   rollbackGen: z.boolean().default(false),
-  simulation: z.boolean().default(false),
+  simulation: z.boolean().default(true),
   gitAwareness: z.boolean().default(false),
 })
 

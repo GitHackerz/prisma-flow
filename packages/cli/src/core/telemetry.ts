@@ -12,8 +12,8 @@
  * What is NOT collected:
  *   - Project paths, schema content, SQL, database URLs, user data
  *
- * Users can opt out by setting PRISMAFLOW_TELEMETRY=off in their environment
- * or .env file.  The opt-out is respected immediately and persistently.
+ * Telemetry is disabled by default for the V1 local-first release. Users can
+ * explicitly enable it by setting PRISMAFLOW_TELEMETRY=on.
  */
 import { logger } from '../logger.js'
 
@@ -21,8 +21,8 @@ const TELEMETRY_ENDPOINT = 'https://telemetry.prismaflow.dev/v1/event'
 
 function isEnabled(): boolean {
   const val = process.env.PRISMAFLOW_TELEMETRY
-  if (!val) return true // opt-in by default
-  return val.toLowerCase() !== 'off' && val.toLowerCase() !== 'false' && val !== '0'
+  if (!val) return false
+  return val.toLowerCase() === 'on' || val.toLowerCase() === 'true' || val === '1'
 }
 
 function bucketCount(n: number): string {

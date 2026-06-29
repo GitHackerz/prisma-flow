@@ -8,11 +8,13 @@ import { SWR_KEYS, fetchMigrations, fetchSimulation } from '../../lib/api'
 export default function SimulatePage() {
   const { data: migrationsData } = useSWR(SWR_KEYS.migrations(1, 50), () => fetchMigrations(1, 50))
   const [selected, setSelected] = useState<string | null>(null)
-  const { data, error, isLoading } = useSWR(selected ? `/api/simulate/${selected}` : null, () =>
-    fetchSimulation(selected!),
+  const { data, error, isLoading } = useSWR(
+    selected ? ['simulation', selected] : null,
+    ([, migration]: [string, string]) => fetchSimulation(migration),
   )
 
   const migrations = migrationsData?.data ?? []
+  const hasMigrations = migrations.length > 0
 
   return (
     <div className="p-6 max-w-4xl">
@@ -40,6 +42,11 @@ export default function SimulatePage() {
             </option>
           ))}
         </select>
+        {!hasMigrations && migrationsData && (
+          <p className="mt-2 text-sm text-muted-foreground">
+            No migrations are available to simulate in this Prisma project.
+          </p>
+        )}
       </div>
 
       {isLoading && (
@@ -59,8 +66,8 @@ export default function SimulatePage() {
 
       {data && (
         <>
-          <div className="flex gap-4 mb-6">
-            <div className="rounded-lg border bg-card p-4 flex-1 text-center">
+          <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-lg border bg-card p-4 text-center">
               <p
                 className={`text-2xl font-bold ${data.wouldSucceed ? 'text-emerald-500' : 'text-destructive'}`}
               >
@@ -70,11 +77,11 @@ export default function SimulatePage() {
                 Would {data.wouldSucceed ? 'succeed' : 'fail'}
               </p>
             </div>
-            <div className="rounded-lg border bg-card p-4 flex-1 text-center">
+            <div className="rounded-lg border bg-card p-4 text-center">
               <p className="text-2xl font-bold">{data.statements.length}</p>
               <p className="text-xs text-muted-foreground mt-1">Statements</p>
             </div>
-            <div className="rounded-lg border bg-card p-4 flex-1 text-center">
+            <div className="rounded-lg border bg-card p-4 text-center">
               <p
                 className={`text-2xl font-bold ${data.destructiveStatements > 0 ? 'text-yellow-500' : 'text-emerald-500'}`}
               >
@@ -82,7 +89,7 @@ export default function SimulatePage() {
               </p>
               <p className="text-xs text-muted-foreground mt-1">Destructive</p>
             </div>
-            <div className="rounded-lg border bg-card p-4 flex-1 text-center">
+            <div className="rounded-lg border bg-card p-4 text-center">
               <p className="text-xs font-mono text-muted-foreground">{data.mode}</p>
               <p className="text-xs text-muted-foreground mt-1">Mode</p>
             </div>
@@ -94,9 +101,13 @@ export default function SimulatePage() {
                 Warnings
               </p>
               <ul className="space-y-1">
-                {data.warnings.map((w, i) => (
-                  <li key={i} className="text-sm text-yellow-700 dark:text-yellow-400">
-                    ⚠ {w}
+                {data.warnings.map((w) => (
+                  <li
+                    key={w}
+                    className="flex items-start gap-2 text-sm text-yellow-700 dark:text-yellow-400"
+                  >
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <span>{w}</span>
                   </li>
                 ))}
               </ul>
@@ -104,9 +115,9 @@ export default function SimulatePage() {
           )}
 
           <div className="space-y-2">
-            {data.statements.map((stmt, i) => (
+            {data.statements.map((stmt) => (
               <div
-                key={i}
+                key={stmt.index}
                 className={`rounded-lg border p-4 ${stmt.isDestructive ? 'border-yellow-500/40 bg-yellow-500/5' : 'bg-card'}`}
               >
                 <div className="flex items-center gap-2 mb-1">
@@ -123,8 +134,8 @@ export default function SimulatePage() {
                   {stmt.sql.slice(0, 200)}
                   {stmt.sql.length > 200 ? '…' : ''}
                 </pre>
-                {stmt.warnings.map((w, wi) => (
-                  <p key={wi} className="mt-1 text-xs text-yellow-600">
+                {stmt.warnings.map((w) => (
+                  <p key={`${stmt.index}-${w}`} className="mt-1 text-xs text-yellow-600">
                     ↳ {w}
                   </p>
                 ))}
@@ -134,7 +145,7 @@ export default function SimulatePage() {
         </>
       )}
 
-      {!selected && !isLoading && (
+      {!selected && !isLoading && hasMigrations && (
         <div className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
           <FlaskConical className="h-10 w-10 opacity-40" />
           <p className="text-sm">Select a migration above to run a simulation.</p>

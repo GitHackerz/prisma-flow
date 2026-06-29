@@ -16,7 +16,10 @@ app.get('/', async (c) => {
     const driftResult = await detectDrift(projectPath)
     if (driftResult.status === 'error') {
       return c.json(
-        { success: false, error: driftResult.errorMessage ?? 'Drift detection failed' },
+        {
+          success: false,
+          error: driftResult.errorMessage ?? 'Drift detection failed',
+        },
         502,
       )
     }
@@ -42,7 +45,10 @@ app.post('/apply', async (c) => {
     const driftResult = await detectDrift(projectPath)
     if (driftResult.status === 'error') {
       return c.json(
-        { success: false, error: driftResult.errorMessage ?? 'Drift detection failed' },
+        {
+          success: false,
+          error: driftResult.errorMessage ?? 'Drift detection failed',
+        },
         502,
       )
     }

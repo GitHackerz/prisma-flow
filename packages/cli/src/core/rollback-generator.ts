@@ -21,7 +21,11 @@ import { splitStatements } from './simulator.js'
 // Statement inverter
 // ─────────────────────────────────────────────────────────────────────────────
 
-function invertStatement(sql: string): { sql: string; automated: boolean; warning?: string } {
+function invertStatement(sql: string): {
+  sql: string
+  automated: boolean
+  warning?: string
+} {
   const trimmed = sql.trim()
 
   // CREATE TABLE → DROP TABLE IF EXISTS

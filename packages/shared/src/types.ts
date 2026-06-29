@@ -9,7 +9,9 @@ export interface Migration {
   timestamp: string // ISO-8601 in API responses
   status: MigrationStatus
   sqlPath: string
+  createdAt?: string
   appliedAt?: string
+  durationMs?: number
 }
 
 export interface MigrationDetail extends Migration {
@@ -65,10 +67,32 @@ export interface ProjectStatus {
   driftDetected: boolean
   driftCount: number
   riskLevel: RiskLevel
+  healthScore: number
+  deploymentReadiness: DeploymentReadiness
   lastSync: string // ISO-8601
   provider?: DatabaseProvider
   projectName?: string
   schemaPath?: string
+  migrationsPath?: string
+  prismaVersion?: string
+  packageManager?: string
+  hasDatabaseUrl?: boolean
+}
+
+export type DeploymentReadinessStatus = 'ready' | 'attention' | 'blocked'
+
+export interface DeploymentReadinessCheck {
+  id: 'database' | 'drift' | 'failed-migrations' | 'pending-migrations' | 'critical-risks'
+  label: string
+  passed: boolean
+  message: string
+}
+
+export interface DeploymentReadiness {
+  status: DeploymentReadinessStatus
+  score: number
+  summary: string
+  checks: DeploymentReadinessCheck[]
 }
 
 // ─── API Responses ────────────────────────────────────────────────────────────
@@ -124,13 +148,13 @@ export interface FeatureFlags {
   webhookAlerts: boolean
   auditLog: boolean
   ciAnnotations: boolean
-  /** Multi-environment comparison (Pro+) */
+  /** Roadmap: multi-environment comparison */
   envComparison: boolean
-  /** Rollback generation (Pro+) */
+  /** Roadmap: rollback generation */
   rollbackGen: boolean
-  /** Migration simulation (Pro+) */
+  /** Migration simulation */
   simulation: boolean
-  /** Git-awareness features (Pro+) */
+  /** Roadmap: git-awareness features */
   gitAwareness: boolean
 }
 

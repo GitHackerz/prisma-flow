@@ -1,0 +1,57 @@
+name: Bug report
+description: Report a reproducible PrismaFlow problem.
+title: "fix: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Do not include database credentials, `.env` files, private schema details, or dashboard tokens.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened, and what did you expect instead?
+      placeholder: PrismaFlow reports drift even though...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction
+      description: List the smallest steps or sample project changes needed to reproduce.
+      placeholder: |
+        1. Create a Prisma project with...
+        2. Run `prisma-flow status`
+        3. See...
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include versions and database provider. Redact connection strings.
+      value: |
+        - OS:
+        - Node:
+        - npm:
+        - Prisma:
+        - PrismaFlow:
+        - Database provider:
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output
+      description: Paste CLI output, stack traces, or screenshots with secrets redacted.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submit checks
+      options:
+        - label: I removed or redacted secrets, tokens, and database URLs.
+          required: true
+        - label: I searched existing issues and did not find a duplicate.
+          required: true

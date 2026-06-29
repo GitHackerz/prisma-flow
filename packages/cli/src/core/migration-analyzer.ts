@@ -1,14 +1,17 @@
-import { execFile } from 'node:child_process'
 import fs from 'node:fs/promises'
-import { promisify } from 'node:util'
-import type { MigrationRiskScore, ProjectStatus, RiskFactor, RiskLevel } from '@prisma-flow/shared'
+import type {
+  DeploymentReadiness,
+  MigrationRiskScore,
+  ProjectStatus,
+  RiskFactor,
+  RiskLevel,
+} from '@prisma-flow/shared'
 import { logger } from '../logger.js'
 import { type DriftDetectionResult, detectDrift } from './drift-detector.js'
+import { execPrisma } from './prisma-cli.js'
 import { type Migration, detectPrismaProject } from './prisma-detector.js'
 
 export type { DriftDetectionResult }
-
-const execFileAsync = promisify(execFile)
 
 // ─── Risk Engine ──────────────────────────────────────────────────────────────
 
@@ -27,26 +30,26 @@ const RISK_PATTERNS: RiskPattern[] = [
   {
     pattern: /DROP\s+TABLE/i,
     label: 'Drops table — irreversible data loss',
-    severity: 'high',
+    severity: 'critical',
     description: 'Drops an entire table and all its data permanently.',
     recommendation: 'Ensure data has been migrated or backed up before applying.',
-    weight: 40,
+    weight: 75,
   },
   {
     pattern: /TRUNCATE/i,
     label: 'Truncates table — full data loss',
-    severity: 'high',
+    severity: 'critical',
     description: 'Removes all rows from a table. Cannot be rolled back with standard SQL.',
     recommendation: 'Export table data before applying this migration.',
-    weight: 35,
+    weight: 65,
   },
   {
     pattern: /DROP\s+COLUMN/i,
     label: 'Drops column — potential data loss',
-    severity: 'high',
+    severity: 'critical',
     description: 'Removes a column and all data stored in it.',
     recommendation: 'Verify no application code reads this column before deploying.',
-    weight: 30,
+    weight: 60,
   },
   {
     pattern: /ALTER\s+COLUMN.+NOT\s+NULL/i,
@@ -127,10 +130,120 @@ export function scoreMigrationRisk(sql: string): MigrationRiskScore {
   const score = Math.min(100, rawScore)
 
   let level: RiskLevel = 'low'
-  if (score >= 50) level = 'high'
+  if (score >= 75) level = 'critical'
+  else if (score >= 50) level = 'high'
   else if (score >= 20) level = 'medium'
 
   return { score, level, factors }
+}
+
+function calculateHealthScore(input: {
+  connected: boolean
+  migrationsPending: number
+  migrationsFailed: number
+  driftCount: number
+  maxRiskScore: number
+}): number {
+  let score = 100
+
+  if (!input.connected) score -= 35
+  score -= Math.min(30, input.migrationsFailed * 25)
+  score -= Math.min(20, input.driftCount * 10)
+  score -= Math.min(15, input.migrationsPending * 5)
+
+  if (input.maxRiskScore >= 75) score -= 25
+  else if (input.maxRiskScore >= 50) score -= 18
+  else if (input.maxRiskScore >= 20) score -= 8
+
+  return Math.max(0, Math.min(100, Math.round(score)))
+}
+
+function buildDeploymentReadiness(input: {
+  connected: boolean
+  migrationsPending: number
+  migrationsFailed: number
+  driftCount: number
+  maxRiskScore: number
+  healthScore: number
+}): DeploymentReadiness {
+  const hasCriticalRisk = input.maxRiskScore >= 75
+  const checks: DeploymentReadiness['checks'] = [
+    {
+      id: 'database',
+      label: 'Database reachable',
+      passed: input.connected,
+      message: input.connected
+        ? 'PrismaFlow can reach the configured datasource.'
+        : 'Check DATABASE_URL and database network access before deploying.',
+    },
+    {
+      id: 'drift',
+      label: 'No schema drift',
+      passed: input.driftCount === 0,
+      message:
+        input.driftCount === 0
+          ? 'The live database matches the Prisma schema.'
+          : `${input.driftCount} drift item${input.driftCount === 1 ? '' : 's'} must be reviewed.`,
+    },
+    {
+      id: 'failed-migrations',
+      label: 'No failed migrations',
+      passed: input.migrationsFailed === 0,
+      message:
+        input.migrationsFailed === 0
+          ? 'Migration history has no failed entries.'
+          : `${input.migrationsFailed} failed migration${input.migrationsFailed === 1 ? '' : 's'} need recovery.`,
+    },
+    {
+      id: 'pending-migrations',
+      label: 'No pending migrations',
+      passed: input.migrationsPending === 0,
+      message:
+        input.migrationsPending === 0
+          ? 'All local migrations are applied.'
+          : `${input.migrationsPending} migration${input.migrationsPending === 1 ? '' : 's'} still pending.`,
+    },
+    {
+      id: 'critical-risks',
+      label: 'No critical migration risks',
+      passed: !hasCriticalRisk,
+      message: hasCriticalRisk
+        ? 'At least one migration contains a critical data-loss operation.'
+        : 'No critical data-loss operations were detected.',
+    },
+  ]
+
+  const blockers = checks.filter(
+    (check) =>
+      !check.passed &&
+      ['database', 'drift', 'failed-migrations', 'critical-risks'].includes(check.id),
+  )
+  const warnings = checks.filter((check) => !check.passed)
+
+  if (blockers.length > 0) {
+    return {
+      status: 'blocked',
+      score: input.healthScore,
+      summary: 'Not ready for deployment',
+      checks,
+    }
+  }
+
+  if (warnings.length > 0) {
+    return {
+      status: 'attention',
+      score: input.healthScore,
+      summary: 'Review pending work before deployment',
+      checks,
+    }
+  }
+
+  return {
+    status: 'ready',
+    score: input.healthScore,
+    summary: 'Ready for deployment',
+    checks,
+  }
 }
 
 // ─── Migration status parsing ─────────────────────────────────────────────────
@@ -152,11 +265,9 @@ async function getMigrationStatusMap(
 
   let stdout = ''
   try {
-    const result = await execFileAsync(
-      'npx',
-      ['prisma', 'migrate', 'status', '--schema', schemaPath],
-      { cwd, timeout: 30_000 },
-    )
+    const result = await execPrisma(cwd, ['migrate', 'status', '--schema', schemaPath], {
+      timeout: 30_000,
+    })
     stdout = result.stdout
     // Exit 0 → all migrations applied; map stays empty (callers default to 'applied')
     return map
@@ -269,8 +380,7 @@ export async function getProjectStatus(cwd: string): Promise<ProjectStatus> {
   // ── Connection check ──────────────────────────────────────────────────────
   let connected = false
   try {
-    await execFileAsync('npx', ['prisma', 'migrate', 'status', '--schema', project.schemaPath], {
-      cwd,
+    await execPrisma(cwd, ['migrate', 'status', '--schema', project.schemaPath], {
       timeout: 30_000,
     })
     connected = true
@@ -308,11 +418,26 @@ export async function getProjectStatus(cwd: string): Promise<ProjectStatus> {
   else if (migrationsPending > 0) riskLevel = 'low'
 
   // Elevate risk if any migration has a high-risk score
-  if (riskLevel !== 'high') {
-    const maxScore = Math.max(0, ...migrations.map((m) => m.riskScore.score))
-    if (maxScore >= 50) riskLevel = 'high'
-    else if (maxScore >= 20 && riskLevel === 'low') riskLevel = 'medium'
-  }
+  const maxRiskScore = Math.max(0, ...migrations.map((m) => m.riskScore.score))
+  if (maxRiskScore >= 75) riskLevel = 'critical'
+  else if (maxRiskScore >= 50) riskLevel = 'high'
+  else if (maxRiskScore >= 20 && riskLevel === 'low') riskLevel = 'medium'
+
+  const healthScore = calculateHealthScore({
+    connected,
+    migrationsPending,
+    migrationsFailed,
+    driftCount: driftResult.items.length,
+    maxRiskScore,
+  })
+  const deploymentReadiness = buildDeploymentReadiness({
+    connected,
+    migrationsPending,
+    migrationsFailed,
+    driftCount: driftResult.items.length,
+    maxRiskScore,
+    healthScore,
+  })
 
   return {
     connected,
@@ -322,8 +447,14 @@ export async function getProjectStatus(cwd: string): Promise<ProjectStatus> {
     driftDetected: hasDrift,
     driftCount: driftResult.items.length,
     riskLevel,
+    healthScore,
+    deploymentReadiness,
     lastSync: new Date().toISOString(),
     ...(project.provider ? { provider: project.provider } : {}),
     schemaPath: project.schemaPath,
+    migrationsPath: project.migrationsPath,
+    ...(project.prismaVersion ? { prismaVersion: project.prismaVersion } : {}),
+    ...(project.packageManager ? { packageManager: project.packageManager } : {}),
+    hasDatabaseUrl: project.databaseUrl.length > 0,
   }
 }

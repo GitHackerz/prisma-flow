@@ -1,12 +1,9 @@
-import { execFile } from 'node:child_process'
-import { promisify } from 'node:util'
 import type { DriftDetectionStatus, DriftItem, DriftType } from '@prisma-flow/shared'
 import { logger } from '../logger.js'
+import { execPrisma } from './prisma-cli.js'
 import { detectPrismaProject } from './prisma-detector.js'
 
 export type { DriftItem, DriftType }
-
-const execFileAsync = promisify(execFile)
 
 export interface DriftDetectionResult {
   items: DriftItem[]
@@ -113,14 +110,17 @@ export function parseSqlStatements(sql: string): string[] {
 export async function detectDrift(cwd: string): Promise<DriftDetectionResult> {
   const project = await detectPrismaProject(cwd)
   if (!project) {
-    return { items: [], status: 'error', errorMessage: 'No Prisma project found' }
+    return {
+      items: [],
+      status: 'error',
+      errorMessage: 'No Prisma project found',
+    }
   }
 
   try {
-    const { stdout } = await execFileAsync(
-      'npx',
+    const { stdout } = await execPrisma(
+      cwd,
       [
-        'prisma',
         'migrate',
         'diff',
         '--from-schema-datamodel',
@@ -129,7 +129,7 @@ export async function detectDrift(cwd: string): Promise<DriftDetectionResult> {
         project.schemaPath,
         '--script',
       ],
-      { cwd, timeout: 30_000 },
+      { timeout: 30_000 },
     )
 
     const output = stdout.trim()
@@ -152,7 +152,11 @@ export async function detectDrift(cwd: string): Promise<DriftDetectionResult> {
       stderr.includes('Connection refused')
     ) {
       logger.debug('Drift detection skipped: database unreachable')
-      return { items: [], status: 'error', errorMessage: 'Database unreachable' }
+      return {
+        items: [],
+        status: 'error',
+        errorMessage: 'Database unreachable',
+      }
     }
     const message = error instanceof Error ? error.message : String(error)
     logger.warn({ err }, 'Drift detection failed')

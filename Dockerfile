@@ -69,7 +69,7 @@ FROM node:20-alpine AS runtime
 
 LABEL org.opencontainers.image.title="prisma-flow" \
       org.opencontainers.image.description="Visual Prisma migration management" \
-      org.opencontainers.image.source="https://github.com/your-org/prisma-flow"
+      org.opencontainers.image.source="https://github.com/prisma-flow/prisma-flow"
 
 # Non-root user for security
 RUN addgroup -S prismaflow && adduser -S prismaflow -G prismaflow

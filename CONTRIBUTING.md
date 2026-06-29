@@ -24,12 +24,12 @@ Be respectful and constructive. We follow the
 
 - Node.js ≥ 20
 - npm ≥ 10
-- A local Postgres instance (or Docker) for integration testing
+- A local Postgres instance, SQLite fixture, or Docker for integration testing
 
 ### Setup
 
 ```bash
-git clone https://github.com/your-org/prisma-flow.git
+git clone https://github.com/prisma-flow/prisma-flow.git
 cd prisma-flow
 npm install           # installs all workspace packages + sets up Husky hooks
 ```
@@ -45,6 +45,8 @@ cp .env.example .env
 ```bash
 npm run typecheck     # zero TypeScript errors expected
 npm test              # all tests should pass
+npm run lint          # Biome lint and formatting checks
+npm run security:audit # high-severity production dependency audit
 npm run build         # full build should succeed
 ```
 
@@ -60,7 +62,7 @@ fix/xxx       ← bug fix branches
 1. Fork the repository and create your branch from `develop`.
 2. Make your changes — keep PRs focused on a single concern.
 3. Add or update tests to cover your change.
-4. Run `npm test` and `npm run typecheck` — both must pass locally.
+4. Run `npm run typecheck`, `npm run lint`, and `npm test` — all must pass locally.
 5. Open a Pull Request targeting `develop`.
 
 ## Commit Convention
@@ -75,17 +77,17 @@ Body (optional) — explain *why*, not just *what*.
 Closes #42
 ```
 
-| Type | When to use |
-|:-----|:------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
+| Type       | When to use                                             |
+| :--------- | :------------------------------------------------------ |
+| `feat`     | New feature                                             |
+| `fix`      | Bug fix                                                 |
+| `docs`     | Documentation only                                      |
 | `refactor` | Code change that neither fixes a bug nor adds a feature |
-| `test` | Adding or updating tests |
-| `chore` | Tooling, dependencies, CI |
-| `perf` | Performance improvement |
+| `test`     | Adding or updating tests                                |
+| `chore`    | Tooling, dependencies, CI                               |
+| `perf`     | Performance improvement                                 |
 
-Husky will enforce this on every commit via `commitlint` (if configured).
+Use this convention for commits and pull request titles.
 
 ## Pull Request Process
 
@@ -94,8 +96,10 @@ Husky will enforce this on every commit via `commitlint` (if configured).
 3. **Screenshots** — include before/after screenshots for UI changes.
 4. **Checklist** before requesting review:
    - [ ] `npm run typecheck` passes
+   - [ ] `npm run lint` passes
    - [ ] `npm test` passes
    - [ ] `npm run format:check` passes (run `npm run format` to auto-fix)
+   - [ ] `npm run security:audit` passes or any advisory is explained
    - [ ] New/changed behaviour is documented
    - [ ] No unrelated files changed
 
@@ -122,11 +126,11 @@ prisma-flow/
 
 ## Testing
 
-| Package | Command | What it runs |
-|:--------|:--------|:-------------|
-| `packages/cli` | `npm test --workspace=packages/cli` | Vitest unit + integration tests |
-| `packages/dashboard` | `npm test --workspace=packages/dashboard` | Vitest + React Testing Library |
-| All | `npm test` | All workspaces via Turborepo |
+| Package              | Command                                   | What it runs                    |
+| :------------------- | :---------------------------------------- | :------------------------------ |
+| `packages/cli`       | `npm test --workspace=packages/cli`       | Vitest unit + integration tests |
+| `packages/dashboard` | `npm test --workspace=packages/dashboard` | Vitest + React Testing Library  |
+| All                  | `npm test`                                | All workspaces via Turborepo    |
 
 Tests live alongside source in `src/tests/` (CLI) and `app/components/*.test.tsx`
 (dashboard).
@@ -141,5 +145,5 @@ push the version tag. If you need guidance on versioning, open an issue.
 
 ## Questions?
 
-Open a [GitHub Discussion](https://github.com/your-org/prisma-flow/discussions)
+Open a [GitHub Discussion](https://github.com/prisma-flow/prisma-flow/discussions)
 — we're happy to help.
