@@ -144,7 +144,7 @@ When adding a new API route, add integration coverage in `server.test.ts`.
 Releases are automated with Release Please. Conventional Commits pushed to
 `main` update a single bot-authored release PR. That PR keeps the CLI and shared
 package versions synchronized, updates their workspace dependency and lockfile,
-and proposes the next semantic version.
+then runs Biome formatting and lint checks before it is ready for review.
 
 Merging the generated release PR runs `.github/workflows/release.yml`, which
 reruns the production gate, publishes any missing package versions to npm, and
