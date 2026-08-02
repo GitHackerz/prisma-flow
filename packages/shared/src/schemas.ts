@@ -101,6 +101,66 @@ export const DeploymentReadinessSchema = z.object({
   checks: z.array(DeploymentReadinessCheckSchema),
 })
 
+export const DeploymentPlanActionSchema = z.object({
+  priority: z.enum(['blocker', 'recommended', 'optional']),
+  title: z.string(),
+  detail: z.string(),
+  command: z.string().optional(),
+  href: z.string().optional(),
+})
+
+export const DeploymentPlanCommandSchema = z.object({
+  label: z.string(),
+  command: z.string(),
+  reason: z.string(),
+})
+
+export const DeploymentPlanMigrationSummarySchema = z.object({
+  total: z.number().int().nonnegative(),
+  applied: z.number().int().nonnegative(),
+  pending: z.number().int().nonnegative(),
+  failed: z.number().int().nonnegative(),
+  pendingNames: z.array(z.string()),
+  failedNames: z.array(z.string()),
+  highestRisk: z
+    .object({
+      name: z.string(),
+      level: RiskLevelSchema,
+      score: z.number().int().min(0).max(100),
+      factors: z.array(RiskFactorSchema),
+    })
+    .optional(),
+})
+
+export const DeploymentPlanDriftSummarySchema = z.object({
+  status: DriftDetectionStatusSchema,
+  detected: z.boolean(),
+  count: z.number().int().nonnegative(),
+  errorMessage: z.string().optional(),
+})
+
+export const DeploymentPlanSchema = z.object({
+  schemaVersion: z.literal('prismaflow-plan/v1'),
+  generatedAt: z.string().datetime(),
+  decision: z.enum(['ready', 'attention', 'blocked']),
+  score: z.number().int().min(0).max(100),
+  summary: z.string(),
+  project: z.object({
+    schemaPath: z.string(),
+    migrationsPath: z.string(),
+    provider: DatabaseProviderSchema.optional(),
+    prismaVersion: z.string().optional(),
+    packageManager: z.string().optional(),
+    hasDatabaseUrl: z.boolean(),
+  }),
+  checks: z.array(DeploymentReadinessCheckSchema),
+  migrations: DeploymentPlanMigrationSummarySchema,
+  drift: DeploymentPlanDriftSummarySchema,
+  actions: z.array(DeploymentPlanActionSchema),
+  commands: z.array(DeploymentPlanCommandSchema),
+  valueHighlights: z.array(z.string()),
+})
+
 export const ProjectStatusSchema = z.object({
   connected: z.boolean(),
   migrationsApplied: z.number().int().nonnegative(),

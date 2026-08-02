@@ -6,10 +6,15 @@ vi.mock('../core/prisma-detector.js', () => ({
   detectPrismaProject: vi.fn().mockResolvedValue({
     projectName: 'test-project',
     schemaPath: '/project/prisma/schema.prisma',
+    migrationsPath: '/project/prisma/migrations',
     migrations: [],
     hasMigrations: true,
     databaseUrl: 'postgresql://localhost/testdb',
     driftCount: 0,
+    schemaContent: '',
+    provider: 'postgresql',
+    packageManager: 'npm',
+    prismaVersion: '^5.22.0',
   }),
 }))
 
@@ -23,9 +28,25 @@ vi.mock('../core/migration-analyzer.js', () => ({
     driftDetected: false,
     driftCount: 0,
     riskLevel: 'low',
+    healthScore: 100,
+    deploymentReadiness: {
+      status: 'ready',
+      score: 100,
+      summary: 'Ready for deployment',
+      checks: [
+        {
+          id: 'database',
+          label: 'Database reachable',
+          passed: true,
+          message: 'PrismaFlow can reach the configured datasource.',
+        },
+      ],
+    },
     lastSync: new Date().toISOString(),
     projectName: 'test-project',
     schemaPath: '/project/prisma/schema.prisma',
+    migrationsPath: '/project/prisma/migrations',
+    hasDatabaseUrl: true,
   }),
   getMigrationDetails: vi.fn().mockResolvedValue(null),
 }))
@@ -117,6 +138,20 @@ describe('Hono API Server', () => {
       }
       expect(body.pagination.page).toBe(2)
       expect(body.pagination.limit).toBe(10)
+    })
+  })
+
+  // ─── /api/plan ───────────────────────────────────────────────────────────
+
+  describe('GET /api/plan', () => {
+    it('returns an actionable deployment plan', async () => {
+      const res = await app.request(`/api/plan?token=${token}`)
+      const body = (await res.json()) as Record<string, unknown>
+      expect(body.success).toBe(true)
+      expect(body.data).toHaveProperty('schemaVersion', 'prismaflow-plan/v1')
+      expect(body.data).toHaveProperty('decision', 'ready')
+      expect(body.data).toHaveProperty('actions')
+      expect(body.data).toHaveProperty('commands')
     })
   })
 

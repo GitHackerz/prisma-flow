@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { analyzeMigrationRisks } from '../core/migration-analyzer.js'
+import { analyzeMigrationRisks, scoreMigrationRisk } from '../core/migration-analyzer.js'
 
 describe('analyzeMigrationRisks()', () => {
   it('returns empty array for safe CREATE TABLE statement', () => {
@@ -17,6 +17,12 @@ describe('analyzeMigrationRisks()', () => {
     const sql = 'ALTER TABLE "User" DROP COLUMN "legacy_field";'
     const risks = analyzeMigrationRisks(sql)
     expect(risks.some((r) => r.includes('Drops column'))).toBe(true)
+  })
+
+  it('classifies data-loss risk factors as critical even when the numeric score is below 75', () => {
+    const sql = 'ALTER TABLE "User" DROP COLUMN "legacy_field";'
+    const riskScore = scoreMigrationRisk(sql)
+    expect(riskScore.level).toBe('critical')
   })
 
   it('detects TRUNCATE as destructive', () => {

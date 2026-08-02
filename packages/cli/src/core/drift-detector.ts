@@ -1,6 +1,6 @@
 import type { DriftDetectionStatus, DriftItem, DriftType } from '@prisma-flow/shared'
 import { logger } from '../logger.js'
-import { execPrisma } from './prisma-cli.js'
+import { execPrismaMigrateDiff } from './prisma-cli.js'
 import { detectPrismaProject } from './prisma-detector.js'
 
 export type { DriftItem, DriftType }
@@ -15,7 +15,13 @@ export function classifyDriftSql(sql: string): DriftType {
   const upper = sql.toUpperCase().trimStart()
   if (upper.startsWith('CREATE TABLE')) return 'table-missing'
   if (upper.startsWith('DROP TABLE')) return 'table-extra'
-  if (upper.startsWith('CREATE INDEX') || upper.startsWith('DROP INDEX')) return 'index-change'
+  if (
+    upper.startsWith('CREATE INDEX') ||
+    upper.startsWith('CREATE UNIQUE INDEX') ||
+    upper.startsWith('DROP INDEX')
+  ) {
+    return 'index-change'
+  }
   if (upper.startsWith('ALTER INDEX')) return 'index-change'
   // Check CONSTRAINT before generic ALTER TABLE so "ALTER TABLE ... ADD CONSTRAINT ..."
   // is classified as a constraint change, not a column mismatch.
@@ -118,19 +124,15 @@ export async function detectDrift(cwd: string): Promise<DriftDetectionResult> {
   }
 
   try {
-    const { stdout } = await execPrisma(
-      cwd,
-      [
-        'migrate',
-        'diff',
-        '--from-schema-datamodel',
-        project.schemaPath,
-        '--to-schema-datasource',
-        project.schemaPath,
-        '--script',
-      ],
-      { timeout: 30_000 },
-    )
+    const env = project.databaseUrl
+      ? { ...process.env, DATABASE_URL: project.databaseUrl }
+      : process.env
+    const { stdout } = await execPrismaMigrateDiff(cwd, {
+      fromSchema: project.schemaPath,
+      legacyDestinationArgs: ['--to-schema-datasource', project.schemaPath],
+      env,
+      timeout: 30_000,
+    })
 
     const output = stdout.trim()
     if (!output) return { items: [], status: 'clean' }

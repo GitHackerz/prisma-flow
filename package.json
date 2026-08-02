@@ -19,11 +19,12 @@
     "test": "turbo run test",
     "clean": "turbo run clean && rm -rf node_modules",
     "security:audit": "npm audit --omit=dev --workspaces --audit-level=high",
+    "verify:release": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build && npm run security:audit && npm pack --dry-run --workspace=@prisma-flow/shared && npm pack --dry-run --workspace=prisma-flow",
     "prepare": "husky"
   },
   "overrides": {
     "postcss": "^8.5.15",
-    "next@16.2.9": {
+    "next": {
       "postcss": "^8.5.15"
     }
   },

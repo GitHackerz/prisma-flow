@@ -245,9 +245,9 @@ function FeaturesGrid() {
     },
     {
       icon: Zap,
-      title: 'Deployment Readiness',
+      title: 'Deployment Plan',
       description:
-        'A health score and readiness checklist summarize drift, failed migrations, pending work, and critical risks before deploy.',
+        'A health score, go/no-go decision, blockers, and exact next commands summarize what to do before deploy.',
       iconColor: 'text-primary' as const,
     },
   ]
@@ -446,6 +446,12 @@ function CLISection() {
       flags: ['--ci', '--json', '--fail-on-risk <level>'],
     },
     {
+      name: 'prisma-flow plan',
+      aka: null,
+      description: 'Generate a deploy decision with blockers and next commands',
+      flags: ['--format <format>', '--json', '--ci', '-o, --output <path>'],
+    },
+    {
       name: 'prisma-flow report',
       aka: null,
       description: 'Generate a local JSON or Markdown report for reviews and CI artifacts',
@@ -569,6 +575,10 @@ jobs:
         with:
           node-version: '20.x'
       - run: npm ci
+      - name: Build migration plan
+        run: npx prisma-flow plan --ci --json
+        env:
+          DATABASE_URL: \${{ secrets.DATABASE_URL }}
       - name: Check migration state
         run: npx prisma-flow check --ci
         env:
@@ -602,6 +612,11 @@ function APIPreview() {
                 method: 'GET',
                 path: '/api/status',
                 desc: 'Project & database health',
+              },
+              {
+                method: 'GET',
+                path: '/api/plan',
+                desc: 'Deploy decision + next steps',
               },
               {
                 method: 'GET',
@@ -708,6 +723,7 @@ function OpenSource() {
     'Migration simulation',
     'Schema explorer and ERD-style overview',
     'Health score and deployment readiness',
+    'Deployment plan with next commands',
     'Reports and CI integration',
   ]
 
@@ -756,8 +772,8 @@ function OpenSource() {
 /* ──────────────────────────────────── Stats ── */
 function Stats() {
   const stats = [
-    { label: 'CLI Commands', value: '13' },
-    { label: 'API Endpoints', value: '18+' },
+    { label: 'CLI Commands', value: '14' },
+    { label: 'API Endpoints', value: '19+' },
     { label: 'Risk Detectors', value: '7' },
     { label: 'Drift Types', value: '6' },
   ]

@@ -86,10 +86,15 @@ function estimateRowsAffected(sql: string): number | undefined {
  * Handles standard semicolon delimiters and skips comment-only blocks.
  */
 export function splitStatements(sql: string): string[] {
-  return sql
+  const withoutComments = sql
+    .split('\n')
+    .filter((line) => !line.trimStart().startsWith('--'))
+    .join('\n')
+
+  return withoutComments
     .split(';')
     .map((s) => s.trim())
-    .filter((s) => s.length > 0 && !s.startsWith('--'))
+    .filter((s) => s.length > 0)
 }
 
 /**
@@ -154,6 +159,22 @@ export async function simulateSqlite(
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error(String(err))
       const staticResult = analyseStatically(migrationName, statements)
+      const errorCode = (err as { code?: string }).code
+      if (
+        errorCode === 'ENOENT' ||
+        error.message.includes('ENOENT') ||
+        error.message.includes('not recognized')
+      ) {
+        return {
+          ...staticResult,
+          warnings: [
+            ...staticResult.warnings,
+            'sqlite3 CLI is not available; used static analysis instead of a shadow database.',
+          ],
+          mode: 'static',
+        }
+      }
+
       return {
         ...staticResult,
         wouldSucceed: false,

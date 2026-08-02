@@ -43,7 +43,7 @@
       "suspicious": {
         "noExplicitAny": "error",
         "noArrayIndexKey": "warn",
-        "noConsole": "warn",
+        "noConsole": "off",
         "noDoubleEquals": "error",
         "noDuplicateCase": "error",
         "noDuplicateClassMembers": "error",

@@ -19,16 +19,22 @@ The default command detects `schema.prisma`, starts the local API server, and op
 prisma-flow              # open the dashboard
 prisma-flow status       # print health and deployment readiness
 prisma-flow check --ci   # fail CI on pending, drift, or failed migrations
+prisma-flow plan         # produce a deploy decision with next commands
 prisma-flow report       # generate JSON or Markdown reports
 prisma-flow simulate     # preview SQL and destructive operations
 prisma-flow inspect      # inspect one migration
+prisma-flow diff         # compare Prisma schema and live database
+prisma-flow rollback     # generate rollback plan or rollback SQL
+prisma-flow repair       # generate or apply drift repair suggestions
+prisma-flow compare      # compare migration state across environments
+prisma-flow history      # show migration history with risk and git metadata
 prisma-flow doctor       # validate local setup
 prisma-flow init         # create prismaflow.config.ts
 ```
 
 ## Dashboard Views
 
-- Overview: detected project, database state, health score, and readiness checks.
+- Overview: detected project, database state, health score, deployment plan, and readiness checks.
 - Migrations: applied, pending, and failed migrations with creation/applied dates and risk context.
 - Drift: changed object, location, SQL evidence, reason it matters, and suggested action.
 - Risks: low, medium, high, and critical migration risk analysis.
@@ -42,12 +48,14 @@ Generate local artifacts:
 ```bash
 prisma-flow report --format json --output prismaflow-report.json
 prisma-flow report --format markdown --output prismaflow-report.md
+prisma-flow plan --format markdown --output prismaflow-plan.md
 ```
 
 Use `check --ci` in any pipeline:
 
 ```bash
 npx prisma-flow check --ci --json
+npx prisma-flow plan --ci --json
 ```
 
 Exit codes:
@@ -68,12 +76,23 @@ The local dashboard API requires the generated session token.
 | Endpoint                    | Purpose                                            |
 | --------------------------- | -------------------------------------------------- |
 | `GET /api/status`           | Project health, drift, risk, and readiness summary |
+| `GET /api/plan`             | Deployment decision, blockers, actions, and commands |
 | `GET /api/migrations`       | Paginated migration timeline                       |
 | `GET /api/migrations/:name` | Migration SQL and risk details                     |
 | `GET /api/drift`            | Cached drift detection result                      |
 | `POST /api/drift/check`     | Fresh drift check                                  |
 | `GET /api/risks`            | Migration risk scores                              |
+| `GET /api/risks/:migration` | Risk details for one migration                     |
 | `GET /api/simulate/:name`   | Migration simulation result                        |
+| `GET /api/rollback/:name`   | Rollback plan for one migration                    |
+| `GET /api/repair`           | Drift repair suggestions                           |
+| `POST /api/repair/apply`    | Apply safe repair suggestions                      |
+| `GET /api/diff`             | Schema/database diff                               |
+| `GET /api/compare`          | Environment comparison                             |
+| `GET /api/git`              | Git-aware migration metadata                       |
+| `GET /api/audit`            | Local PrismaFlow audit log entries                 |
+| `GET /api/config`           | Safe config view                                   |
+| `GET /api/events`           | Server-sent events stream                          |
 | `GET /api/schema`           | Parsed schema explorer data                        |
 
 ## V1 Boundaries

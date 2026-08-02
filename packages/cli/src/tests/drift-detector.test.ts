@@ -75,6 +75,12 @@ describe('classifyDriftSql()', () => {
     expect(classifyDriftSql('CREATE INDEX "idx_email" ON "User"("email")')).toBe('index-change')
   })
 
+  it('classifies CREATE UNIQUE INDEX as index-change', () => {
+    expect(classifyDriftSql('CREATE UNIQUE INDEX "User_email_key" ON "User"("email")')).toBe(
+      'index-change',
+    )
+  })
+
   it('classifies DROP INDEX as index-change', () => {
     expect(classifyDriftSql('DROP INDEX "idx_old"')).toBe('index-change')
   })

@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { Hono } from 'hono'
-import { detectPrismaProject } from '../../core/prisma-detector.js'
+import { detectPrismaProject, resolveSqliteFilePath } from '../../core/prisma-detector.js'
 import { simulate } from '../../core/simulator.js'
 
 type Variables = { projectPath: string; requestId: string }
@@ -22,7 +22,7 @@ app.get('/:migration', async (c) => {
     const sqlFile = path.join(project.migrationsPath, match.name, 'migration.sql')
     const dbPath =
       project.provider === 'sqlite' && project.databaseUrl
-        ? project.databaseUrl.replace(/^file:/, '')
+        ? (resolveSqliteFilePath(project.databaseUrl, project.schemaPath) ?? undefined)
         : undefined
 
     const result = await simulate(match.name, sqlFile, dbPath)

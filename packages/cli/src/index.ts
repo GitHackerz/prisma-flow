@@ -8,6 +8,7 @@ import { doctorCommand } from './commands/doctor.js'
 import { historyCommand } from './commands/history.js'
 import { initCommand } from './commands/init.js'
 import { inspectCommand } from './commands/inspect.js'
+import { planCommand } from './commands/plan.js'
 import { repairCommand } from './commands/repair.js'
 import { reportCommand } from './commands/report.js'
 import { rollbackCommand } from './commands/rollback.js'
@@ -21,10 +22,11 @@ program
   .description('Visual Prisma migration management — safe, observable, production-ready')
   .version(process.env.npm_package_version ?? '0.1.0')
 
-program.addCommand(dashboardCommand(), { isDefault: true })
+program.addCommand(dashboardCommand())
 program.addCommand(statusCommand())
 program.addCommand(checkCommand())
 program.addCommand(reportCommand())
+program.addCommand(planCommand())
 program.addCommand(initCommand())
 program.addCommand(doctorCommand())
 
@@ -42,5 +44,17 @@ program.addCommand(compareCommand())
 
 // ── History & Audit ───────────────────────────────────────────────────────
 program.addCommand(historyCommand())
+
+const args = process.argv.slice(2)
+const firstArg = args[0]
+const startsWithDashboardOption =
+  firstArg === '-p' ||
+  firstArg === '--port' ||
+  firstArg?.startsWith('--port=') ||
+  firstArg === '--no-open'
+
+if (args.length === 0 || startsWithDashboardOption) {
+  process.argv.splice(2, 0, 'dashboard')
+}
 
 program.parse(process.argv)

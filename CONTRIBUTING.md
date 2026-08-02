@@ -12,6 +12,7 @@ what to work on, and how to submit changes.
 - [Pull Request Process](#pull-request-process)
 - [Project Structure](#project-structure)
 - [Testing](#testing)
+- [Releasing](#releasing)
 
 ## Code of Conduct
 
@@ -53,7 +54,7 @@ npm run build         # full build should succeed
 ## Development Workflow
 
 ```
-main          ← production releases only (tags trigger the release workflow)
+main          ← production releases publish new npm package versions automatically
 develop       ← integration branch; all PRs target here
 feature/xxx   ← your working branch
 fix/xxx       ← bug fix branches
@@ -140,8 +141,55 @@ When adding a new API route, add integration coverage in `server.test.ts`.
 
 ## Releasing
 
-Releases are handled by the CI workflow — only maintainers merge to `main` and
-push the version tag. If you need guidance on versioning, open an issue.
+Releases are handled by `.github/workflows/release.yml`. A merge or push to
+`main` publishes each package whose version is not already present on npm.
+
+Before the first public release:
+
+1. Create or claim the `@prisma-flow` npm organization.
+2. Add an npm automation token as the GitHub Actions secret `NPM_TOKEN`.
+3. Confirm private vulnerability reporting is enabled in GitHub repository
+   settings.
+4. Confirm both package names are available:
+
+```bash
+npm view prisma-flow version
+npm view @prisma-flow/shared version
+```
+
+Before every release:
+
+```bash
+npm run verify:release
+```
+
+Update both publishable package versions together:
+
+- `packages/shared/package.json`
+- `packages/cli/package.json`
+- `package-lock.json`
+
+Then merge or push to `main`. The workflow re-runs the release gate, publishes
+only versions not already on npm, and creates the matching GitHub release tag.
+The repository must have an npm automation token with publish access stored as
+the `NPM_TOKEN` GitHub Actions secret.
+
+After CI publishes, test from a fresh Prisma project:
+
+```bash
+npx prisma-flow@latest --help
+npx prisma-flow@latest doctor
+```
+
+For a one-time manual first publish, do not pass `--provenance` from a local
+terminal. npm provenance is generated from supported CI/OIDC providers, not from
+ordinary local shells. If npm requires two-factor authentication, pass a current
+OTP code directly to each publish command:
+
+```bash
+npm publish --workspace=packages/shared --access public --otp=<code>
+npm publish --workspace=packages/cli --otp=<code>
+```
 
 ## Questions?
 

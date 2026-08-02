@@ -16,6 +16,25 @@ export interface PrismaProject {
   prismaVersion: string | null
 }
 
+export function resolveSqliteFilePath(databaseUrl: string, schemaPath: string): string | null {
+  if (!databaseUrl.startsWith('file:')) return null
+
+  const rawPath = databaseUrl.slice('file:'.length)
+  if (!rawPath || rawPath === ':memory:') return rawPath
+  if (path.isAbsolute(rawPath)) return rawPath
+
+  const schemaDir = path.dirname(schemaPath)
+  return path.resolve(schemaDir, rawPath)
+}
+
+export function normalizeDatabaseUrlForPrismaCommand(
+  databaseUrl: string,
+  schemaPath: string,
+): string {
+  const sqlitePath = resolveSqliteFilePath(databaseUrl, schemaPath)
+  return sqlitePath ? `file:${sqlitePath}` : databaseUrl
+}
+
 /**
  * Parse the database provider from the Prisma schema `datasource` block.
  */

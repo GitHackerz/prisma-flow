@@ -129,8 +129,10 @@ export function scoreMigrationRisk(sql: string): MigrationRiskScore {
   const rawScore = matchedPatterns.reduce((acc, p) => acc + p.weight, 0)
   const score = Math.min(100, rawScore)
 
+  const hasCriticalFactor = matchedPatterns.some((pattern) => pattern.severity === 'critical')
+
   let level: RiskLevel = 'low'
-  if (score >= 75) level = 'critical'
+  if (hasCriticalFactor || score >= 75) level = 'critical'
   else if (score >= 50) level = 'high'
   else if (score >= 20) level = 'medium'
 
@@ -164,9 +166,10 @@ function buildDeploymentReadiness(input: {
   migrationsFailed: number
   driftCount: number
   maxRiskScore: number
+  hasCriticalRisk: boolean
   healthScore: number
 }): DeploymentReadiness {
-  const hasCriticalRisk = input.maxRiskScore >= 75
+  const hasCriticalRisk = input.hasCriticalRisk || input.maxRiskScore >= 75
   const checks: DeploymentReadiness['checks'] = [
     {
       id: 'database',
@@ -406,7 +409,7 @@ export async function getProjectStatus(cwd: string): Promise<ProjectStatus> {
 
   // ── Drift detection ───────────────────────────────────────────────────────
   let driftResult: DriftDetectionResult = { items: [], status: 'clean' }
-  if (connected) {
+  if (connected && migrationsPending === 0) {
     driftResult = await detectDrift(cwd)
   }
   const hasDrift = driftResult.status === 'drifted'
@@ -419,7 +422,12 @@ export async function getProjectStatus(cwd: string): Promise<ProjectStatus> {
 
   // Elevate risk if any migration has a high-risk score
   const maxRiskScore = Math.max(0, ...migrations.map((m) => m.riskScore.score))
-  if (maxRiskScore >= 75) riskLevel = 'critical'
+  const hasCriticalRisk = migrations.some(
+    (m) =>
+      m.riskScore.level === 'critical' ||
+      m.riskScore.factors.some((factor) => factor.severity === 'critical'),
+  )
+  if (hasCriticalRisk || maxRiskScore >= 75) riskLevel = 'critical'
   else if (maxRiskScore >= 50) riskLevel = 'high'
   else if (maxRiskScore >= 20 && riskLevel === 'low') riskLevel = 'medium'
 
@@ -436,6 +444,7 @@ export async function getProjectStatus(cwd: string): Promise<ProjectStatus> {
     migrationsFailed,
     driftCount: driftResult.items.length,
     maxRiskScore,
+    hasCriticalRisk,
     healthScore,
   })
 

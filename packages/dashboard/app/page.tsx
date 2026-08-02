@@ -4,7 +4,8 @@ import { AlertCircle, CheckCircle2, RefreshCw, XCircle } from 'lucide-react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Toaster } from 'sonner'
 import useSWR from 'swr'
-import { SWR_KEYS, fetchMigrations, fetchStatus } from '../lib/api'
+import { SWR_KEYS, fetchMigrations, fetchPlan, fetchStatus } from '../lib/api'
+import { DeploymentPlanPanel } from './components/DeploymentPlanPanel'
 import { DriftAlert } from './components/DriftAlert'
 import { HealthCheck } from './components/HealthCheck'
 import { MigrationList } from './components/MigrationList'
@@ -76,6 +77,14 @@ export default function Dashboard() {
     },
   )
 
+  const {
+    data: plan,
+    error: planError,
+    isLoading: planLoading,
+  } = useSWR(SWR_KEYS.plan, fetchPlan, {
+    refreshInterval: 10_000,
+  })
+
   if (statusLoading && !status) return <LoadingScreen />
   if (statusError && !status) return <ConnectionError />
 
@@ -96,6 +105,12 @@ export default function Dashboard() {
         {status?.driftDetected && <DriftAlert />}
 
         {status && <StatusCards status={status} />}
+
+        <DeploymentPlanPanel
+          plan={plan ?? null}
+          isLoading={planLoading}
+          error={planError?.message}
+        />
 
         {status && (
           <section className="mt-8 rounded-xl border bg-card p-6 shadow">

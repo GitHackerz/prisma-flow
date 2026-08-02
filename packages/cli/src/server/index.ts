@@ -16,6 +16,7 @@ import driftRoutes from './routes/drift.js'
 import eventsRoutes from './routes/events.js'
 import gitRoutes from './routes/git.js'
 import migrationsRoutes from './routes/migrations.js'
+import planRoutes from './routes/plan.js'
 import repairRoutes from './routes/repair.js'
 import risksRoutes from './routes/risks.js'
 import rollbackRoutes from './routes/rollback.js'
@@ -105,6 +106,7 @@ export function createServer(projectPath: string): {
 
   // ── API Routes ───────────────────────────────────────────────────────────
   app.route('/api/migrations', migrationsRoutes)
+  app.route('/api/plan', planRoutes)
   app.route('/api/status', statusRoutes)
   app.route('/api/schema', schemaRoutes)
   app.route('/api/drift', driftRoutes)

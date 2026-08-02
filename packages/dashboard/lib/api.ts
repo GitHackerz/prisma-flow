@@ -7,6 +7,7 @@
  */
 import type {
   ApiSuccess,
+  DeploymentPlan,
   DriftItem,
   DriftResult,
   Migration,
@@ -50,6 +51,7 @@ export interface SchemaDatamodel {
 export type {
   DriftItem,
   DriftResult,
+  DeploymentPlan,
   Migration,
   MigrationDetail,
   MigrationRiskScore,
@@ -108,6 +110,11 @@ export async function fetchStatus(): Promise<ProjectStatus> {
   return body.data
 }
 
+export async function fetchPlan(): Promise<DeploymentPlan> {
+  const body = await request<ApiSuccess<DeploymentPlan>>('/api/plan')
+  return body.data
+}
+
 export async function fetchMigrations(page = 1, limit = 50): Promise<PaginatedResponse<Migration>> {
   return request<PaginatedResponse<Migration>>(`/api/migrations?page=${page}&limit=${limit}`)
 }
@@ -163,6 +170,7 @@ export async function fetchSimulation(migration: string): Promise<SimulationResu
 
 export const SWR_KEYS = {
   status: '/api/status',
+  plan: '/api/plan',
   migrations: (page: number, limit: number) => `/api/migrations?page=${page}&limit=${limit}`,
   drift: '/api/drift',
   schema: '/api/schema',

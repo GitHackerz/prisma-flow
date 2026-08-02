@@ -8,7 +8,7 @@ import path from 'node:path'
 import chalk from 'chalk'
 import { Command } from 'commander'
 import { writeAuditEntry } from '../core/audit.js'
-import { detectPrismaProject } from '../core/prisma-detector.js'
+import { detectPrismaProject, resolveSqliteFilePath } from '../core/prisma-detector.js'
 import { simulate } from '../core/simulator.js'
 import { trackEvent } from '../core/telemetry.js'
 
@@ -45,7 +45,7 @@ export function simulateCommand() {
           // Use DB file path for SQLite shadow sim
           const dbPath =
             project.provider === 'sqlite' && project.databaseUrl
-              ? project.databaseUrl.replace(/^file:/, '')
+              ? (resolveSqliteFilePath(project.databaseUrl, project.schemaPath) ?? undefined)
               : undefined
 
           const result = await simulate(match.name, sqlFile, dbPath)

@@ -95,6 +95,70 @@ export interface DeploymentReadiness {
   checks: DeploymentReadinessCheck[]
 }
 
+// ─── Deployment Plan ─────────────────────────────────────────────────────────
+
+export type DeploymentPlanDecision = DeploymentReadinessStatus
+
+export type DeploymentPlanPriority = 'blocker' | 'recommended' | 'optional'
+
+export interface DeploymentPlanAction {
+  priority: DeploymentPlanPriority
+  title: string
+  detail: string
+  command?: string
+  href?: string
+}
+
+export interface DeploymentPlanCommand {
+  label: string
+  command: string
+  reason: string
+}
+
+export interface DeploymentPlanMigrationSummary {
+  total: number
+  applied: number
+  pending: number
+  failed: number
+  pendingNames: string[]
+  failedNames: string[]
+  highestRisk?: {
+    name: string
+    level: RiskLevel
+    score: number
+    factors: RiskFactor[]
+  }
+}
+
+export interface DeploymentPlanDriftSummary {
+  status: DriftDetectionStatus
+  detected: boolean
+  count: number
+  errorMessage?: string
+}
+
+export interface DeploymentPlan {
+  schemaVersion: 'prismaflow-plan/v1'
+  generatedAt: string
+  decision: DeploymentPlanDecision
+  score: number
+  summary: string
+  project: {
+    schemaPath: string
+    migrationsPath: string
+    provider?: DatabaseProvider
+    prismaVersion?: string
+    packageManager?: string
+    hasDatabaseUrl: boolean
+  }
+  checks: DeploymentReadinessCheck[]
+  migrations: DeploymentPlanMigrationSummary
+  drift: DeploymentPlanDriftSummary
+  actions: DeploymentPlanAction[]
+  commands: DeploymentPlanCommand[]
+  valueHighlights: string[]
+}
+
 // ─── API Responses ────────────────────────────────────────────────────────────
 
 export interface ApiSuccess<T> {
@@ -186,6 +250,7 @@ export type AuditAction =
   | 'migration.inspect'
   | 'migration.history'
   | 'migration.create'
+  | 'deployment.plan'
   | 'doctor.run'
   | 'env.compare'
   | 'schema.diff'

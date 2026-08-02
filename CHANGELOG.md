@@ -11,6 +11,25 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.1.1] — 2026-08-01
+
+### Added
+
+- Deployment planning and actionable release guidance in the CLI and dashboard.
+- Automated npm publishing from `main` for new package versions, guarded by the full release gate.
+
+### Fixed
+
+- Prisma 7 `migrate diff` compatibility, with fallback support for Prisma 5/6.
+- Classification of `CREATE UNIQUE INDEX` drift statements as index changes.
+
+### Security
+
+- Upgraded the Hono Node adapter to the patched 2.x release.
+- Kept Next.js solely in private static-export build packages so the published CLI runtime contains no Next.js server dependency.
+
+---
+
 ## [0.1.0] — 2026-02-01
 
 ### Added
@@ -87,5 +106,6 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Authentication: was none → per-session random Bearer token on all API routes
 - Child processes: `exec` with template strings → `execFile` with explicit argument arrays
 
-[Unreleased]: https://github.com/prisma-flow/prisma-flow/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/prisma-flow/prisma-flow/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/prisma-flow/prisma-flow/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/prisma-flow/prisma-flow/releases/tag/v0.1.0

@@ -74,8 +74,7 @@ export function rollbackCommand() {
           )
           console.log()
 
-          for (let i = 0; i < plan.steps.length; i++) {
-            const step = plan.steps[i]!
+          for (const [i, step] of plan.steps.entries()) {
             const icon = step.automated ? chalk.green('✓') : chalk.yellow('⚠')
             const label = step.automated ? chalk.dim('[auto]') : chalk.yellow('[manual]')
             console.log(`  ${icon} Step ${i + 1} ${label}`)

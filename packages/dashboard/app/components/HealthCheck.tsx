@@ -10,15 +10,21 @@ export function HealthCheck({ status }: { status: ProjectStatus | null }) {
   let health: 'healthy' | 'warning' | 'error' = 'healthy'
   let message = 'System Operational'
 
-  if (status.migrationsFailed > 0) {
+  if (!status.connected) {
+    health = 'error'
+    message = 'DB Disconnected'
+  } else if (status.migrationsFailed > 0) {
     health = 'error'
     message = 'Migration Failures'
+  } else if (status.deploymentReadiness.status === 'blocked') {
+    health = 'error'
+    message = 'Deployment Blocked'
   } else if (status.driftDetected) {
     health = 'warning'
     message = `Schema Drift (${status.driftCount})`
-  } else if (!status.connected) {
-    health = 'error'
-    message = 'DB Disconnected'
+  } else if (status.deploymentReadiness.status === 'attention') {
+    health = 'warning'
+    message = 'Review Needed'
   }
 
   const variants: Record<typeof health, string> = {

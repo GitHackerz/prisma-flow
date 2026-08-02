@@ -7,7 +7,8 @@
 
 import fs from 'node:fs/promises'
 import type { SchemaDiff, SchemaDiffType } from '@prisma-flow/shared'
-import { execPrisma } from './prisma-cli.js'
+import { execPrismaMigrateDiff } from './prisma-cli.js'
+import { normalizeDatabaseUrlForPrismaCommand } from './prisma-detector.js'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Prisma schema text parser (lightweight — regex-based, not full AST)
@@ -180,22 +181,16 @@ export async function diffSchemaVsDatabase(
   databaseUrl: string,
   cwd: string,
 ): Promise<{ sql: string; diffs: SchemaDiff[] }> {
-  const env = { ...process.env, DATABASE_URL: databaseUrl }
+  const normalizedDatabaseUrl = normalizeDatabaseUrlForPrismaCommand(databaseUrl, schemaPath)
+  const env = { ...process.env, DATABASE_URL: normalizedDatabaseUrl }
 
   try {
-    const { stdout } = await execPrisma(
-      cwd,
-      [
-        'migrate',
-        'diff',
-        '--from-schema-datamodel',
-        schemaPath,
-        '--to-database-url',
-        databaseUrl,
-        '--script',
-      ],
-      { env, timeout: 30_000 },
-    )
+    const { stdout } = await execPrismaMigrateDiff(cwd, {
+      fromSchema: schemaPath,
+      legacyDestinationArgs: ['--to-database-url', normalizedDatabaseUrl],
+      env,
+      timeout: 30_000,
+    })
 
     // Parse the SQL diff output into structured diffs
     const diffs = parseSqlDiff(stdout)

@@ -99,6 +99,11 @@ const commandRows = [
     '--ci; --json; --fail-on-risk <level>; --quiet',
   ],
   [
+    'plan',
+    'Generate a deploy decision with blockers, priority actions, and exact next commands.',
+    '--format <format>; --json; --ci; -o, --output <path>',
+  ],
+  [
     'report',
     'Generate JSON or Markdown reports for reviews and CI artifacts.',
     '--format <format>; --json; -o, --output <path>',
@@ -133,6 +138,7 @@ const commandRows = [
 const apiRows = [
   ['GET /health', 'Unauthenticated process health for local monitors.'],
   ['GET /api/status', 'Project health, drift, risk, readiness, and detected metadata.'],
+  ['GET /api/plan', 'Deployment decision, blockers, priority actions, and commands.'],
   ['GET /api/migrations?page=1&limit=20', 'Paginated migration timeline.'],
   ['GET /api/migrations/:name', 'Single migration SQL, risk score, and details.'],
   ['GET /api/drift', 'Cached drift result, refreshed every 10 seconds.'],
@@ -361,6 +367,7 @@ npm install -g prisma-flow`}
           language="bash"
           code={`prisma-flow dashboard --port 5555
 prisma-flow status --json
+prisma-flow plan --format markdown --output prismaflow-plan.md
 prisma-flow check --ci --fail-on-risk high
 prisma-flow report --format markdown --output prismaflow-report.md
 prisma-flow doctor --json`}
@@ -405,7 +412,7 @@ prisma-flow rollback 20260228120000_add_billing --print-sql`}
           {[
             [
               'Overview',
-              'Detected project, health score, readiness checks, and suggested next actions.',
+              'Detected project, health score, deployment plan, readiness checks, and suggested next actions.',
             ],
             [
               'Migrations',
@@ -455,6 +462,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      - run: npx prisma-flow plan --ci --json
       - run: npx prisma-flow check --ci --json
       - run: npx prisma-flow report --format markdown --output prismaflow-report.md`}
         />
