@@ -1,12 +1,16 @@
 {
   "name": "@prisma-flow/shared",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Shared PrismaFlow schemas, types, and error classes.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "publishConfig": {
     "access": "public"
   },
