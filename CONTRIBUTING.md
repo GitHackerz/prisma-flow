@@ -54,7 +54,7 @@ npm run build         # full build should succeed
 ## Development Workflow
 
 ```
-main          ← production releases publish new npm package versions automatically
+main          ← Release Please prepares versioned release PRs
 develop       ← integration branch; all PRs target here
 feature/xxx   ← your working branch
 fix/xxx       ← bug fix branches
@@ -141,8 +141,15 @@ When adding a new API route, add integration coverage in `server.test.ts`.
 
 ## Releasing
 
-Releases are handled by `.github/workflows/release.yml`. A merge or push to
-`main` publishes each package whose version is not already present on npm.
+Releases are automated with Release Please. Conventional Commits pushed to
+`main` update a single bot-authored release PR. That PR keeps the CLI and shared
+package versions synchronized, updates their workspace dependency and lockfile,
+and proposes the next semantic version.
+
+Merging the generated release PR runs `.github/workflows/release.yml`, which
+reruns the production gate, publishes any missing package versions to npm, and
+creates the matching GitHub release and tag. Ordinary pushes to `main` never
+publish npm packages.
 
 Before the first public release:
 
@@ -157,22 +164,17 @@ npm view prisma-flow version
 npm view @prisma-flow/shared version
 ```
 
-Before every release:
+Before every release PR is merged:
 
 ```bash
 npm run verify:release
 ```
 
-Update both publishable package versions together:
-
-- `packages/shared/package.json`
-- `packages/cli/package.json`
-- `package-lock.json`
-
-Then merge or push to `main`. The workflow re-runs the release gate, publishes
-only versions not already on npm, and creates the matching GitHub release tag.
-The repository must have an npm automation token with publish access stored as
-the `NPM_TOKEN` GitHub Actions secret.
+Use Conventional Commits to choose the automatic bump: `fix:` produces a patch,
+`feat:` produces a minor release, and `feat!:` or `BREAKING CHANGE:` produces a
+major release. Review and merge the Release Please PR when ready. The repository
+must have an npm automation token with publish access stored as the `NPM_TOKEN`
+GitHub Actions secret.
 
 After CI publishes, test from a fresh Prisma project:
 
