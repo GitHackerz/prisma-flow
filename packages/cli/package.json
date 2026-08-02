@@ -13,21 +13,8 @@
   "bugs": {
     "url": "https://github.com/prisma-flow/prisma-flow/issues"
   },
-  "keywords": [
-    "prisma",
-    "migrations",
-    "database",
-    "schema-drift",
-    "cli",
-    "dashboard",
-    "devtools"
-  ],
-  "files": [
-    "dist",
-    "public",
-    "README.md",
-    "LICENSE"
-  ],
+  "keywords": ["prisma", "migrations", "database", "schema-drift", "cli", "dashboard", "devtools"],
+  "files": ["dist", "public", "README.md", "LICENSE"],
   "publishConfig": {
     "access": "public"
   },
